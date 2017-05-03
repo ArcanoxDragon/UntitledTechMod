@@ -1,13 +1,26 @@
 package me.arcanox.techmod.api.items
 
+import me.arcanox.techmod.util.IInitStageHandler
+import me.arcanox.techmod.util.Logger
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraftforge.event.RegistryEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-object ItemsAPI : IItemAPI {
-	val items: Map<String, Item> = emptyMap()
+object ItemsAPI : IItemAPI, IInitStageHandler {
+	val items: MutableMap<String, Item> = mutableMapOf()
 	
-	internal fun init(): Unit {
+	override fun onPreInit(): Unit {
+		this.defineItems();
+	}
 	
+	private fun defineItems() {
+	
+	}
+	
+	@SubscribeEvent
+	fun registerItems(event: RegistryEvent.Register<Item>): Unit {
+		Logger.info("Registering items...");
 	}
 	
 	override fun getItem(name: String): Item? {

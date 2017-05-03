@@ -2,15 +2,24 @@ package me.arcanox.techmod.api
 
 import me.arcanox.techmod.api.blocks.BlocksAPI
 import me.arcanox.techmod.api.items.ItemsAPI;
+import me.arcanox.techmod.util.IInitStageHandler
+import net.minecraftforge.common.MinecraftForge
 
-object APIImpl {
-	internal fun init(): Unit {
-		BlocksAPI.init();
-		ItemsAPI.init();
+object APIImpl : IInitStageHandler {
+	internal fun registerEventHandlers() {
+		MinecraftForge.EVENT_BUS.register(BlocksAPI);
+		MinecraftForge.EVENT_BUS.register(ItemsAPI);
 	}
 	
-	internal fun finishInit(): Unit {
+	override fun onPreInit() {
+		BlocksAPI.onPreInit();
+		ItemsAPI.onPreInit();
+	}
+	
+	override fun onPostInit() {
+		API.blockAPI = BlocksAPI;
 		API.itemAPI = ItemsAPI;
+		
 		API.modLoaded = true;
 	}
 }

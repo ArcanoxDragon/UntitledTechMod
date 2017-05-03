@@ -1,12 +1,9 @@
 package me.arcanox.techmod.common.blocks
 
-import me.arcanox.techmod.common.Constants
-
-import net.minecraft.block.Block
+import me.arcanox.techmod.api.Constants
+import me.arcanox.techmod.api.blocks.HasItemBlock
+import me.arcanox.techmod.common.blocks.base.BlockBase
 import net.minecraft.block.material.Material
 
-class BlockAutomaticDoor : Block(Material.IRON) {
-	init {
-		this.unlocalizedName = Constants.Blocks.AutomaticDoor;
-	}
-}
+@HasItemBlock
+class BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.IRON)

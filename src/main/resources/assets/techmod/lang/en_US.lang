@@ -1,0 +1,5 @@
+# Creative Tab
+itemGroup.techmod=Tech Mod
+
+# Blocks
+tile.techmod:automatic_door.name=Automatic Door

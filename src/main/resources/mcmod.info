@@ -1,6 +1,6 @@
 [{
-  "modid": "techmod",
-  "name": "TechMod",
+  "modid": "${modid}",
+  "name": "${modname}",
   "description": "Needs a description still.",
   "version": "${version}",
   "mcversion": "${mcversion}",

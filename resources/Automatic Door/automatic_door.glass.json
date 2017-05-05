@@ -1,0 +1,17 @@
+{
+    "textures": {
+        "glass": "window"
+    },
+    "elements": [{
+        "from": [0, 1, 1],
+        "to": [4, 28, 15],
+        "faces": {
+            "down": { "uv": [0, 15, 8, 16], "texture": "#glass", "rotation": 270 },
+            "up": { "uv": [0, 15, 8, 16], "texture": "#glass", "rotation": 270 },
+            "north": { "uv": [0, 0, 1.5, 16], "texture": "#glass" },
+            "south": { "uv": [0, 0, 1.5, 16], "texture": "#glass" },
+            "west": { "uv": [0, 0, 8, 16], "texture": "#glass" },
+            "east": { "uv": [0, 0, 8, 16], "texture": "#glass" }
+        }
+    }]
+}

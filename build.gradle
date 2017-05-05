@@ -1,3 +1,17 @@
+def loadConfig(name) {
+    def cfgFile = file("${name}.properties")
+    return cfgFile.withReader {
+        def prop = new Properties()
+        prop.load(it)
+        return new ConfigSlurper().parse(prop)
+    }
+}
+
+ext {
+    // load mod details and put them in a project property
+    mod = loadConfig("mod")
+}
+
 buildscript {
     repositories {
         jcenter()
@@ -6,64 +20,71 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_ver"
+
+        // Depend on the Kotlin plugin
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-apply plugin: 'kotlin'
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-def configFile = file("build.properties")
-def config = parseConfig(configFile)
+// Activate the Kotlin plugin
+apply plugin: 'kotlin'
 
-version = "${config.version}.${config.build_number}"
-group = config.group
-archivesBaseName = config.mod_name
+version = "${ext.mod.version}.${ext.mod.build_number}"
+group = ext.mod.group
+archivesBaseName = ext.mod.id
 
 repositories {
+    // Forgelin repository
     maven { url = "http://mvn.rx14.co.uk/shadowfacts/" }
 }
+
+// region Java Source Compat
 
 sourceCompatibility = targetCompatibility = "1.8"
 compileJava {
     sourceCompatibility = targetCompatibility = "1.8"
 }
 
+// endregion
+
+// Shade configuration for any libraries that need to be shaded into the JAR
 configurations {
     shade
     compile.extendsFrom shade
 }
 
 minecraft {
-    version = "${config.mc_version}-${config.forge_version}"
+    version = "${mc_version}-${forge_version}"
     runDir = "run"
-    mappings = config.mc_mappings
+    mappings = mappings_version
 
+    // Replace the version specifier in the mod's main class
     replace "@VERSION@", project.version
     replaceIn "TechMod.kt"
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
+    // Kotlin dependencies
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "net.shadowfacts:Forgelin:1.4.1"
-
-    shade "org.jetbrains:annotations:$annotations_version"
 }
 
 processResources {
     // this will ensure that this task is redone when the versions change.
-    //inputs.property "version", project.version
-    //inputs.property "mcversion", project.minecraft.version
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        // replace version and mcversion
+        // replace mcmod.info stuff
         expand 'version': project.version,
                 'mcversion': project.minecraft.version,
-                'modid': config.mod_name,
-                'modname': config.mod_displayname
+                'modid': project.ext.mod.id,
+                'modname': project.ext.mod.name
     }
 
     // copy everything else except the mcmod.info
@@ -78,13 +99,5 @@ jar {
         from(project.zipTree(dep)) {
             exclude 'META-INF', 'META-INF/**'
         }
-    }
-}
-
-static def parseConfig(File config) {
-    config.withReader {
-        def prop = new Properties()
-        prop.load(it)
-        return (new ConfigSlurper().parse(prop))
     }
 }

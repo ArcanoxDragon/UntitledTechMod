@@ -1,61 +1,59 @@
 package me.arcanox.techmod.api.blocks
 
-import me.arcanox.techmod.common.blocks.BlockAutomaticDoor
 import me.arcanox.techmod.common.blocks.base.BlockBase
 import me.arcanox.techmod.util.IInitStageHandler
 import me.arcanox.techmod.util.Logger
-
+import me.arcanox.techmod.util.reflect.*
 import net.minecraft.block.Block
-import net.minecraft.item.Item
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
-import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-
+import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.fml.common.FMLCommonHandler
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
-import net.minecraftforge.fml.relauncher.SideOnly
 
 object BlocksAPI : IBlockAPI, IInitStageHandler {
 	val blocks: MutableMap<String, Block> = mutableMapOf()
 	val blockItems: MutableMap<String, ItemBlock> = mutableMapOf()
 	
-	init {
-		arrayOf(
-				::BlockAutomaticDoor
-		).forEach { new ->
-			val block = new();
-			this.blocks += Pair(block.apiName, block);
-		}
+	override fun onPreInit(e: FMLPreInitializationEvent) {
+		val discoveredBlocks = ReflectionHelper
+				.getInstancesWithAnnotation(e.asmData, ModBlock::class, BlockBase::class)
+				.map { (block, _) -> Pair(block.apiName, block) };
+		
+		this.blocks += discoveredBlocks;
+		
+		Logger.info("Registering ${this.blocks.size} blocks...");
+		
+		this.registerBlocks();
+		this.registerBlockItems();
 	}
 	
-	@SubscribeEvent
-	fun registerBlocks(event: RegistryEvent.Register<Block>): Unit {
-		Logger.info("Registering blocks...");
-		
-		this.blocks.values.forEach(event.registry::register);
+	fun registerBlocks(): Unit {
+		this.blocks.values.forEach { GameRegistry.register(it) };
 	}
 	
-	@SubscribeEvent
-	fun registerBlockItems(event: RegistryEvent.Register<Item>): Unit {
-		Logger.info("Registering block items...");
+	fun registerBlockItems(): Unit {
+		val blocksWithItems = this.blocks.filterValues { it.classHasAnnotation<HasItemBlock>() };
 		
-		for ((name, block) in this.blocks) {
-			// Only block classes with @HasItemBlock directly applied to them will automatically receive ItemBlocks
-			if (block.javaClass.getDeclaredAnnotation(HasItemBlock::class.java) != null) {
-				val blockItem = ItemBlock(block)
-				
-				blockItem.registryName = block.registryName;
-				
-				this.blockItems += Pair(name, blockItem);
-				event.registry.register(blockItem);
+		Logger.info("Registering ${blocksWithItems.size} block items...");
+		
+		// Only block classes with @HasItemBlock directly applied to them will automatically receive ItemBlocks
+		for ((name, block) in blocksWithItems) {
+			val blockItem = ItemBlock(block)
+			
+			blockItem.registryName = block.registryName;
+			
+			this.blockItems += Pair(name, blockItem);
+			GameRegistry.register(blockItem);
+			
+			if (FMLCommonHandler.instance().effectiveSide == Side.CLIENT) {
+				if (block.classHasAnnotation<HasItemModel>()) {
+					ModelLoader.setCustomModelResourceLocation(blockItem, 0, ModelResourceLocation(block.registryName.toString()));
+				}
 			}
-		}
-	}
-	
-	@SideOnly(Side.CLIENT)
-	fun registerBlockModels(): Unit {
-		for ((name, block) in this.blocks) {
-		
 		}
 	}
 	

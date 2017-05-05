@@ -20,8 +20,8 @@
 		},
 		{
 			"__comment": "Door Frame N",
-			"from": [ 1, 0, 0 ],
-			"to": [ 5, 29, 1 ],
+			"from": [ 0, 0, 0 ],
+			"to": [ 4, 29, 1 ],
 			"faces": {
 				"down": { "uv": [ 1, 15, 5, 16 ], "texture": "#metal" },
 				"up": { "uv": [ 1, 0, 5, 1 ], "texture": "#metal" },
@@ -33,8 +33,8 @@
 		},
 		{
 			"__comment": "Door Frame B",
-			"from": [ 1, 0, 1 ],
-			"to": [ 5, 1, 16 ],
+			"from": [ 0, 0, 1 ],
+			"to": [ 4, 1, 16 ],
 			"faces": {
 				"down": { "uv": [ 1, 0, 5, 15 ], "texture": "#metal" },
 				"up": { "uv": [ 1, 1, 5, 16 ], "texture": "#metal" },
@@ -46,8 +46,8 @@
 		},
 		{
 			"__comment": "Door Frame S",
-			"from": [ 1, 1, 15 ],
-			"to": [ 5, 29, 16 ],
+			"from": [ 0, 1, 15 ],
+			"to": [ 4, 29, 16 ],
 			"faces": {
 				"down": { "uv": [ 1, 0, 5, 1 ], "texture": "#metal" },
 				"up": { "uv": [ 1, 15, 5, 16 ], "texture": "#metal" },
@@ -59,8 +59,8 @@
 		},
 		{
 			"__comment": "Door Frame T",
-			"from": [ 1, 28, 1 ],
-			"to": [ 5, 29, 15 ],
+			"from": [ 0, 28, 1 ],
+			"to": [ 4, 29, 15 ],
 			"faces": {
 				"down": { "uv": [ 1, 1, 5, 15 ], "texture": "#metal" },
 				"up": { "uv": [ 1, 1, 5, 15 ], "texture": "#metal" },
@@ -72,8 +72,8 @@
 		},
 		{
 			"__comment": "Door Window",
-			"from": [ 1, 1, 1 ],
-			"to": [ 5, 28, 15 ],
+			"from": [ 0, 1, 1 ],
+			"to": [ 4, 28, 15 ],
 			"faces": {
 				"down": { "uv": [ 0, 15, 8, 16 ], "texture": "#glass", "rotation": 270 },
 				"up": { "uv": [ 0, 15, 8, 16 ], "texture": "#glass", "rotation": 270 },
@@ -83,5 +83,12 @@
 				"east": { "uv": [ 0, 0, 8, 16 ], "texture": "#glass" }
 			}
 		}
-	]
+	],
+	"display": {
+		"gui": {
+			"rotation":  [ 30, 225, 0 ],
+			"translation":  [ -2.086, -4.173, 0 ],
+			"scale":  [ 0.451, 0.451, 0.451 ]
+		}
+	}
 }

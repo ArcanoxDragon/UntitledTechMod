@@ -1,13 +1,13 @@
 package me.arcanox.techmod.api.items
 
-import me.arcanox.techmod.util.IInitStageHandler
+import me.arcanox.techmod.common.proxy.IInitStageHandler
 import me.arcanox.techmod.util.Logger
+import me.arcanox.techmod.util.reflect.InitHandler
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
+@InitHandler
 object ItemsAPI : IItemAPI, IInitStageHandler {
 	val items: MutableMap<String, Item> = mutableMapOf()
 	

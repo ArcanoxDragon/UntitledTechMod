@@ -1,27 +1,90 @@
 package me.arcanox.techmod.client.tileentities.renderers
 
-import me.arcanox.techmod.TechMod
-import me.arcanox.techmod.client.util.render.ModelHelper
 import me.arcanox.techmod.common.tileentities.TileEntityAutomaticDoor
+import net.minecraft.block.BlockDoor
+import net.minecraft.block.BlockHorizontal
+import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.VertexBuffer
 import net.minecraft.client.renderer.block.model.IBakedModel
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.model.IModel
-import net.minecraftforge.client.model.ModelLoaderRegistry
+import net.minecraft.client.renderer.block.model.ModelRotation
+import net.minecraft.util.math.MathHelper
+import net.minecraftforge.common.model.IModelState
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 
 @SideOnly(Side.CLIENT)
-object TESRAutomaticDoor : TileEntitySpecialRenderer<TileEntityAutomaticDoor>(), ITESRWithModels {
-	var modelFrame: IBakedModel? = null;
-	var modelGlass: IBakedModel? = null;
+object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
+	private val RenderPassDoor = 0;
+	private val RenderPassMount = 1;
 	
-	override fun loadModels() {
-		modelFrame = ModelHelper.bakeModel(ModelLoaderRegistry.getModel(ResourceLocation(TechMod.ModID, "block/automatic_door_frame")))
-		modelGlass = ModelHelper.bakeModel(ModelLoaderRegistry.getModel(ResourceLocation(TechMod.ModID, "block/automatic_door_glass")))
+	@ModelLocation("block/automatic_door/mount") var mapMount: Map<IModelState, IBakedModel>? = null;
+	@ModelLocation("block/automatic_door/door") var mapDoor: Map<IModelState, IBakedModel>? = null;
+	
+	override val renderPasses: Int = 2
+	
+	override var requestedModelStates: List<IModelState>
+		= listOf(ModelRotation.X0_Y0,
+		         ModelRotation.X0_Y90,
+		         ModelRotation.X0_Y180,
+		         ModelRotation.X0_Y270)
+	
+	override fun transformInCube(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, renderPass: Int) {
+		if (!te.hasWorld()) return;
+		
+		when (renderPass) {
+			RenderPassDoor -> transformDoor(te, partialTicks)
+		}
 	}
 	
-	override fun renderTileEntityAt(te: TileEntityAutomaticDoor?, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int) {
-		if (modelFrame ?: modelGlass == null) return;
+	override fun renderModels(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, renderPass: Int, buffer: VertexBuffer) {
+		if (!te.hasWorld()) return;
+		
+		val state = te.world.getBlockState(te.pos);
+		val half = state.getValue(BlockDoor.HALF);
+		val facing = state.getValue(BlockHorizontal.FACING);
+		val modelRot = ModelRotation.getModelRotation(0, facing.rotateYCCW().horizontalAngle.toInt());
+		
+		if (half == BlockDoor.EnumDoorHalf.UPPER) return;
+		
+		val model = when (renderPass) {
+			RenderPassDoor  -> this.mapDoor?.get(modelRot)
+			RenderPassMount -> this.mapMount?.get(modelRot)
+			else            -> null
+		}
+		
+		if (model == null) return;
+		
+		this.render.renderModel(te.world, model, te.world.getBlockState(te.pos), te.pos, buffer, false);
 	}
+	
+	// region Transform
+	
+	private fun transformDoor(te: TileEntityAutomaticDoor, partialTicks: Float) {
+		val state = te.world.getBlockState(te.pos);
+		val hinge = state.getValue(BlockDoor.HINGE);
+		val facing = state.getValue(BlockHorizontal.FACING);
+		
+		GlStateManager.translate(8.0 / 16.0, 0.0, 8.0 / 16.0); // center y axis of block is at voxel 8,0,8
+		GlStateManager.rotate(facing.rotateYCCW().horizontalAngle, 0.0f, -1.0f, 0.0f); // rotate so model origin is at correct rotation point
+		GlStateManager.translate(-8.0 / 16.0, 0.0, -8.0 / 16.0); // center y axis of block is at voxel 8,0,8
+		
+		when (hinge) {
+			BlockDoor.EnumHingePosition.LEFT -> {
+				GlStateManager.translate(1.0 / 16.0, 0.0, 1.0 / 16.0); // hinge is at voxel 1,0,1
+				GlStateManager.rotate(te.getRotation(partialTicks), 0.0f, 1.0f, 0.0f);
+				GlStateManager.translate(-1.0 / 16.0, 0.0, -1.0 / 16.0);
+			}
+			else                             -> {
+				GlStateManager.translate(1.0 / 16.0, 0.0, 15.0 / 16.0); // hinge is at voxel 15,0,1
+				GlStateManager.rotate(-te.getRotation(partialTicks), 0.0f, 1.0f, 0.0f);
+				GlStateManager.translate(-1.0 / 16.0, 0.0, -15.0 / 16.0);
+			}
+		}
+		
+		GlStateManager.translate(8.0 / 16.0, 0.0, 8.0 / 16.0); // center y axis of block is at voxel 8,0,8
+		GlStateManager.rotate(facing.rotateYCCW().horizontalAngle, 0.0f, 1.0f, 0.0f); // rotate back to original orientation for this facing
+		GlStateManager.translate(-8.0 / 16.0, 0.0, -8.0 / 16.0); // center y axis of block is at voxel 8,0,8
+	}
+	
+	// endregion
 }

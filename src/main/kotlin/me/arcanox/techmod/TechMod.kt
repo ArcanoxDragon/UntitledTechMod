@@ -18,14 +18,15 @@ object TechMod {
 	const val Adapter = "net.shadowfacts.forgelin.KotlinAdapter"
 	
 	@SidedProxy(
-			clientSide = "me.arcanox.$ModID.client.proxy.ClientProxy",
-			serverSide = "me.arcanox.$ModID.server.proxy.ClientProxy"
+		clientSide = "me.arcanox.$ModID.client.proxy.ClientProxy",
+		serverSide = "me.arcanox.$ModID.server.proxy.ClientProxy"
 	)
 	lateinit var proxy: CommonProxy;
 	
 	@EventHandler
 	fun preInit(event: FMLPreInitializationEvent): Unit {
-		Logger.info("Beginning pre-initialization phase...");
+		// Mod logger isn't initialized here so we can't use its .info shortcut
+		event.modLog.info(Logger.format("Beginning pre-initialization phase..."));
 		
 		this.proxy.onPreInit(event);
 		

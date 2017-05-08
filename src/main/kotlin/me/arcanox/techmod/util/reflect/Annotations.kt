@@ -1,6 +1,14 @@
 package me.arcanox.techmod.util.reflect
 
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+// region Initialization
+
+@Target(AnnotationTarget.CLASS)
+annotation class InitHandler(val priority: Int = 5)
+
+@Target(AnnotationTarget.CLASS)
+annotation class ClientInitHandler(val priority: Int = 5)
+
+// endregion
 
 // region Blocks
 

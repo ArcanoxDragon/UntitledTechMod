@@ -1,7 +1,8 @@
 package me.arcanox.techmod.api.blocks
 
 import me.arcanox.techmod.common.blocks.base.BlockBase
-import me.arcanox.techmod.util.IInitStageHandler
+import me.arcanox.techmod.common.proxy.IClientInitHandler
+import me.arcanox.techmod.common.proxy.IInitStageHandler
 import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
 import net.minecraft.block.Block
@@ -13,15 +14,18 @@ import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
-object BlocksAPI : IBlockAPI, IInitStageHandler {
+@InitHandler
+@ClientInitHandler
+object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 	val blocks: MutableMap<String, Block> = mutableMapOf()
 	val blockItems: MutableMap<String, ItemBlock> = mutableMapOf()
 	
 	override fun onPreInit(e: FMLPreInitializationEvent) {
 		val discoveredBlocks = ReflectionHelper
-				.getInstancesWithAnnotation(e.asmData, ModBlock::class, BlockBase::class)
-				.map { (block, _) -> Pair(block.apiName, block) };
+			.getInstancesWithAnnotation(e.asmData, ModBlock::class, BlockBase::class)
+			.map { (block, _) -> Pair(block.apiName, block) };
 		
 		this.blocks += discoveredBlocks;
 		
@@ -29,6 +33,10 @@ object BlocksAPI : IBlockAPI, IInitStageHandler {
 		
 		this.registerBlocks();
 		this.registerBlockItems();
+	}
+	
+	override fun onClientPreInit(e: FMLPreInitializationEvent) {
+		this.registerBlockItemModels();
 	}
 	
 	fun registerBlocks(): Unit {
@@ -48,12 +56,20 @@ object BlocksAPI : IBlockAPI, IInitStageHandler {
 			
 			this.blockItems += Pair(name, blockItem);
 			GameRegistry.register(blockItem);
-			
-			if (FMLCommonHandler.instance().effectiveSide == Side.CLIENT) {
-				if (block.classHasAnnotation<HasItemModel>()) {
-					ModelLoader.setCustomModelResourceLocation(blockItem, 0, ModelResourceLocation(block.registryName.toString()));
-				}
-			}
+		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	fun registerBlockItemModels(): Unit {
+		val blockItemsWithModel = this.blocks
+			.filter { this.blockItems.containsKey(it.key) }
+			.filter { it.value.classHasAnnotation<HasItemModel>() };
+		
+		Logger.info("Registering models for ${blockItemsWithModel.size} block items...");
+		
+		blockItemsWithModel.forEach { (name, block) ->
+			val blockItem = this.blockItems[name]!!;
+			ModelLoader.setCustomModelResourceLocation(blockItem, 0, ModelResourceLocation(block.registryName.toString()));
 		}
 	}
 	

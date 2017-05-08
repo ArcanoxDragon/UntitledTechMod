@@ -1,0 +1,81 @@
+{
+	"__comment": "Door that swings open when a player approaches",
+	"textures": {
+		"metal": "techmod:block/automatic_door/metal",
+		"glass": "techmod:block/automatic_door/window"
+	},
+	"elements": [
+		{
+			"__comment": "Door Frame N",
+			"from": [ 0, 0, 0 ],
+			"to": [ 2, 31, 1 ],
+			"faces": {
+				"down": { "uv": [ 1, 15, 5, 16 ], "texture": "#metal" },
+				"up": { "uv": [ 1, 0, 5, 1 ], "texture": "#metal" },
+				"north": { "uv": [ 11, 0, 15, 16 ], "texture": "#metal" },
+				"south": { "uv": [ 1, 0, 5, 16 ], "texture": "#metal" },
+				"west": { "uv": [ 0, 0, 1, 16 ], "texture": "#metal" },
+				"east": { "uv": [ 15, 0, 16, 16 ], "texture": "#metal" }
+			}
+		},
+		{
+			"__comment": "Door Frame B",
+			"from": [ 0, 0, 1 ],
+			"to": [ 2, 1, 16 ],
+			"faces": {
+				"down": { "uv": [ 1, 0, 5, 15 ], "texture": "#metal" },
+				"up": { "uv": [ 1, 1, 5, 16 ], "texture": "#metal" },
+				"north": { "uv": [ 11, 15, 15, 16 ], "texture": "#metal" },
+				"south": { "uv": [ 1, 15, 5, 16 ], "texture": "#metal" },
+				"west": { "uv": [ 1, 15, 16, 16 ], "texture": "#metal" },
+				"east": { "uv": [ 0, 15, 15, 16 ], "texture": "#metal" }
+			}
+		},
+		{
+			"__comment": "Door Frame S",
+			"from": [ 0, 1, 15 ],
+			"to": [ 2, 31, 16 ],
+			"faces": {
+				"down": { "uv": [ 1, 0, 5, 1 ], "texture": "#metal" },
+				"up": { "uv": [ 1, 15, 5, 16 ], "texture": "#metal" },
+				"north": { "uv": [ 11, 0, 15, 15 ], "texture": "#metal" },
+				"south": { "uv": [ 1, 0, 5, 15 ], "texture": "#metal" },
+				"west": { "uv": [ 15, 0, 16, 15 ], "texture": "#metal" },
+				"east": { "uv": [ 0, 0, 1, 15 ], "texture": "#metal" }
+			}
+		},
+		{
+			"__comment": "Door Frame T",
+			"from": [ 0, 30, 1 ],
+			"to": [ 2, 31, 15 ],
+			"faces": {
+				"down": { "uv": [ 1, 1, 5, 15 ], "texture": "#metal" },
+				"up": { "uv": [ 1, 1, 5, 15 ], "texture": "#metal" },
+				"north": { "uv": [ 11, 3, 15, 4 ], "texture": "#metal" },
+				"south": { "uv": [ 1, 3, 5, 4 ], "texture": "#metal" },
+				"west": { "uv": [ 1, 3, 15, 4 ], "texture": "#metal" },
+				"east": { "uv": [ 1, 3, 15, 4 ], "texture": "#metal" }
+			}
+		},
+		{
+			"__comment": "Door Window",
+			"from": [ 0, 1, 1 ],
+			"to": [ 2, 30, 15 ],
+			"faces": {
+				"down": { "uv": [ 0, 15, 8, 16 ], "texture": "#glass", "rotation": 270 },
+				"up": { "uv": [ 0, 15, 8, 16 ], "texture": "#glass", "rotation": 270 },
+				"north": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#glass" },
+				"south": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#glass" },
+				"west": { "uv": [ 0, 0, 8, 16 ], "texture": "#glass" },
+				"east": { "uv": [ 0, 0, 8, 16 ], "texture": "#glass" }
+			}
+		}
+	],
+	"display": {
+		"gui": {
+			"rotation":  [ 30, 225, 0 ],
+			"translation":  [ -2.086, -4.173, 0 ],
+			"scale":  [ 0.451, 0.451, 0.451 ]
+		}
+	}
+}

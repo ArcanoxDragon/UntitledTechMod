@@ -1,4 +1,4 @@
-package me.arcanox.techmod.util
+package me.arcanox.techmod.common.proxy
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent

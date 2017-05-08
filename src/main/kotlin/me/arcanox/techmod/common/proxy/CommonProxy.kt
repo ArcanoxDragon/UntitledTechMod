@@ -1,17 +1,20 @@
 package me.arcanox.techmod.common.proxy
 
-import me.arcanox.techmod.api.APIImpl
-import me.arcanox.techmod.common.tileentities.TileEntities
-import me.arcanox.techmod.util.IInitStageHandler
+import me.arcanox.techmod.util.reflect.InitHandler
+import me.arcanox.techmod.util.reflect.ReflectionHelper
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 
 open class CommonProxy : IInitStageHandler {
-	private val stageHandlers = arrayOf(APIImpl,
-	                                    TileEntities)
+	private val stageHandlers = emptyList<IInitStageHandler>().toMutableList();
 	
 	override fun onPreInit(e: FMLPreInitializationEvent) {
+		this.stageHandlers += ReflectionHelper
+			.getInstancesWithAnnotation(e.asmData, InitHandler::class, IInitStageHandler::class)
+			.sortedBy { it.second.priority }
+			.map { it.first };
+		
 		this.stageHandlers.forEach { it.onPreInit(e) };
 	}
 	

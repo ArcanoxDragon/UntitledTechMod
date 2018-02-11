@@ -3,30 +3,33 @@ package me.arcanox.techmod.client.tileentities.renderers
 import me.arcanox.techmod.common.tileentities.TileEntityAutomaticDoor
 import net.minecraft.block.BlockDoor
 import net.minecraft.block.BlockHorizontal
+import net.minecraft.client.renderer.BufferBuilder
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.VertexBuffer
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.block.model.ModelRotation
+import net.minecraft.client.renderer.vertex.VertexBuffer
 import net.minecraft.util.math.MathHelper
+import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.common.model.IModelState
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 
 @SideOnly(Side.CLIENT)
 object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
-	private val RenderPassDoor = 0;
-	private val RenderPassMount = 1;
+	private const val RenderPassDoor = 0;
+	private const val RenderPassMount = 1;
 	
-	@ModelLocation("block/automatic_door/mount") var mapMount: Map<IModelState, IBakedModel>? = null;
-	@ModelLocation("block/automatic_door/door") var mapDoor: Map<IModelState, IBakedModel>? = null;
+	@ModelLocation("block/automatic_door/mount")
+	var mapMount: Map<IModelState, IBakedModel>? = null;
+	@ModelLocation("block/automatic_door/door")
+	var mapDoor: Map<IModelState, IBakedModel>? = null;
 	
-	override val renderPasses: Int = 2
+	override val renderPasses: Int = 21
 	
-	override var requestedModelStates: List<IModelState>
-		= listOf(ModelRotation.X0_Y0,
-		         ModelRotation.X0_Y90,
-		         ModelRotation.X0_Y180,
-		         ModelRotation.X0_Y270)
+	override var requestedModelStates: List<IModelState> = listOf(ModelRotation.X0_Y0,
+	                                                              ModelRotation.X0_Y90,
+	                                                              ModelRotation.X0_Y180,
+	                                                              ModelRotation.X0_Y270)
 	
 	override fun transformInCube(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, renderPass: Int) {
 		if (!te.hasWorld()) return;
@@ -36,14 +39,14 @@ object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
 		}
 	}
 	
-	override fun renderModels(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, renderPass: Int, buffer: VertexBuffer) {
+	override fun renderModels(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, renderPass: Int, buffer: BufferBuilder) {
 		if (!te.hasWorld()) return;
 		
-		val state = te.world.getBlockState(te.pos);
+		val world = MinecraftForgeClient.getRegionRenderCache(te.world, te.pos);
+		val state = world.getBlockState(te.pos);
 		val half = state.getValue(BlockDoor.HALF);
 		val facing = state.getValue(BlockHorizontal.FACING);
 		val modelRot = ModelRotation.getModelRotation(0, facing.rotateYCCW().horizontalAngle.toInt());
-		
 		if (half == BlockDoor.EnumDoorHalf.UPPER) return;
 		
 		val model = when (renderPass) {
@@ -54,7 +57,7 @@ object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
 		
 		if (model == null) return;
 		
-		this.render.renderModel(te.world, model, te.world.getBlockState(te.pos), te.pos, buffer, false);
+		this.render.renderModel(world, model, world.getBlockState(te.pos), te.pos, buffer, false);
 	}
 	
 	// region Transform

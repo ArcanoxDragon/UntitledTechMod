@@ -15,10 +15,11 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraftforge.client.event.ModelBakeEvent
-import net.minecraftforge.client.model.IModel
+import net.minecraftforge.client.event.ModelRegistryEvent
+import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.IBMRasterposClip
+import java.lang.reflect.Field
 
 @Target(AnnotationTarget.FIELD)
 annotation class ModelLocation(val location: String)
@@ -32,17 +33,16 @@ abstract class TESRWithModels<T : TileEntity> : TileEntitySpecialRenderer<T>(), 
 	val tessellator: Tessellator by lazy { Tessellator.getInstance() };
 	
 	abstract fun transformInCube(te: T, x: Double, y: Double, z: Double, partialTicks: Float, renderPass: Int)
-	abstract fun renderModels(te: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, renderPass: Int, buffer: VertexBuffer)
+	abstract fun renderModels(te: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, renderPass: Int, buffer: BufferBuilder)
 	abstract val renderPasses: Int;
 	
-	protected open var requestedModelStates = emptyList<IModelState>()
-		get;
+	protected open var requestedModelStates = emptyList<IModelState>();
 	
 	protected fun renderModel(world: IBlockAccess, model: IBakedModel, blockState: IBlockState, pos: BlockPos): Unit {
 		this.render.renderModel(world, model, blockState, pos, this.tessellator.buffer, false);
 	}
 	
-	final override fun loadModels(e: ModelBakeEvent) {
+	private fun forEachModelField(singleModelAction: (Field) -> Unit, multiModelAction: (Field) -> Unit) {
 		val modelType = IBakedModel::class.java;
 		val modelMapType = Map::class.java;
 		
@@ -51,33 +51,38 @@ abstract class TESRWithModels<T : TileEntity> : TileEntitySpecialRenderer<T>(), 
 			.declaredFields
 			.filter { modelType.isAssignableFrom(it.type) }
 			.filter { it.hasAnnotation<ModelLocation>() }
-			.forEach {
+			.forEach(singleModelAction);
+		
+		// Load all multi-state model maps
+		this.javaClass
+			.declaredFields
+			.filter { it.type.typeParameters.size == 2 }
+			.filter { modelMapType.isAssignableFrom(it.type) }
+			.filter { it.hasAnnotation<ModelLocation>() }
+			.forEach(multiModelAction)
+	}
+	
+	final override fun loadModels(e: ModelBakeEvent) {
+		this.forEachModelField(
+			{
 				val annotation = it.getAnnotation(ModelLocation::class.java);
 				val bakedModel = ModelHelper.getBakedModel(ResourceLocation(TechMod.ModID, annotation.location));
 				
 				it.isAccessible = true;
 				it.set(this, bakedModel);
-			}
-		
-		// Load all multi-state model maps
-		this.javaClass
-			.declaredFields
-			.filter { modelMapType.isAssignableFrom(it.type) }
-			.filter { it.type.typeParameters.size == 2 }
-			.filter { it.hasAnnotation<ModelLocation>() }
-			.forEach {
+			}, {
 				val annotation = it.getAnnotation(ModelLocation::class.java);
 				val bakedModels = ModelHelper.getBakedModelForStates(ResourceLocation(TechMod.ModID, annotation.location), this.requestedModelStates)
 				
 				it.isAccessible = true;
 				it.set(this, bakedModels);
-			}
+			});
 	}
 	
-	override fun renderTileEntityAt(te: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int) {
+	override fun render(te: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, unknown1: Float) {
 		GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-		Minecraft.getMinecraft().textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		GlStateManager.disableLighting();
+		this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+		RenderHelper.disableStandardItemLighting();
 		GlStateManager.color(1f, 1f, 1f);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z); // account for player offset in TESR dispatcher

@@ -7,11 +7,15 @@ import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.item.Item
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
@@ -22,28 +26,27 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 	val blocks: MutableMap<String, Block> = mutableMapOf()
 	val blockItems: MutableMap<String, ItemBlock> = mutableMapOf()
 	
+	init {
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+	
 	override fun onPreInit(e: FMLPreInitializationEvent) {
 		val discoveredBlocks = ReflectionHelper
 			.getInstancesWithAnnotation(e.asmData, ModBlock::class, BlockBase::class)
 			.map { (block, _) -> Pair(block.apiName, block) };
 		
 		this.blocks += discoveredBlocks;
-		
+	}
+	
+	@SubscribeEvent
+	fun registerBlocks(e: RegistryEvent.Register<Block>) {
 		Logger.info("Registering ${this.blocks.size} blocks...");
 		
-		this.registerBlocks();
-		this.registerBlockItems();
+		this.blocks.values.forEach { e.registry.register(it) };
 	}
 	
-	override fun onClientPreInit(e: FMLPreInitializationEvent) {
-		this.registerBlockItemModels();
-	}
-	
-	fun registerBlocks(): Unit {
-		this.blocks.values.forEach { GameRegistry.register(it) };
-	}
-	
-	fun registerBlockItems(): Unit {
+	@SubscribeEvent
+	fun registerBlockItems(e: RegistryEvent.Register<Item>) {
 		val blocksWithItems = this.blocks.filterValues { it.classHasAnnotation<HasItemBlock>() };
 		
 		Logger.info("Registering ${blocksWithItems.size} block items...");
@@ -55,12 +58,15 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 			blockItem.registryName = block.registryName;
 			
 			this.blockItems += Pair(name, blockItem);
-			GameRegistry.register(blockItem);
+			e.registry.register(blockItem);
 		}
+		
+		if ( FMLCommonHandler.instance().side == Side.CLIENT )
+			this.registerBlockItemModels();
 	}
 	
 	@SideOnly(Side.CLIENT)
-	fun registerBlockItemModels(): Unit {
+	fun registerBlockItemModels() {
 		val blockItemsWithModel = this.blocks
 			.filter { this.blockItems.containsKey(it.key) }
 			.filter { it.value.classHasAnnotation<HasItemModel>() };
@@ -88,6 +94,6 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 	override fun getBlockItemStack(name: String, count: Int): ItemStack? {
 		if (name !in this.blocks) return null;
 		
-		return ItemStack(this.getBlock(name), count);
+		return ItemStack(this.getBlock(name)!!, count);
 	}
 }

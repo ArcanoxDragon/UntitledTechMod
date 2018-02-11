@@ -1,5 +1,12 @@
 {
   "forge_marker": 1,
+  "defaults": {
+    "textures": {
+      "__comment": "Preloads all the textures used by the TESR, otherwise it won't load them on the first load",
+      "metal": "techmod:block/automatic_door/metal",
+      "glass": "techmod:block/automatic_door/window"
+    }
+  },
   "variants": {
     "open": {
       "true": { },

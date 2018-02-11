@@ -5,17 +5,21 @@ import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.InitHandler
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @InitHandler
 object ItemsAPI : IItemAPI, IInitStageHandler {
 	val items: MutableMap<String, Item> = mutableMapOf()
 	
-	override fun onPreInit(e: FMLPreInitializationEvent) {
-		this.registerItems();
+	init {
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
-	fun registerItems(): Unit {
+	@SubscribeEvent
+	fun registerItems(e: RegistryEvent.Register<Item>): Unit {
 		Logger.info("Registering ${this.items.size} items...");
 	}
 	

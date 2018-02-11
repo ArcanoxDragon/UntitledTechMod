@@ -24,7 +24,7 @@ object TechMod {
 	lateinit var proxy: CommonProxy;
 	
 	@EventHandler
-	fun preInit(event: FMLPreInitializationEvent): Unit {
+	fun preInit(event: FMLPreInitializationEvent) {
 		// Mod logger isn't initialized here so we can't use its .info shortcut
 		event.modLog.info(Logger.format("Beginning pre-initialization phase..."));
 		
@@ -34,7 +34,7 @@ object TechMod {
 	}
 	
 	@EventHandler
-	fun init(event: FMLInitializationEvent): Unit {
+	fun init(event: FMLInitializationEvent) {
 		Logger.info("Beginning initialization phase...");
 		
 		this.proxy.onInit(event);
@@ -43,7 +43,7 @@ object TechMod {
 	}
 	
 	@EventHandler
-	fun postInit(event: FMLPostInitializationEvent): Unit {
+	fun postInit(event: FMLPostInitializationEvent) {
 		Logger.info("Beginning post-initialization phase...");
 		
 		this.proxy.onPostInit(event);

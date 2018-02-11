@@ -18,6 +18,7 @@ buildscript {
 
         maven { url = "http://files.minecraftforge.net/maven" }
     }
+
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
 
@@ -37,7 +38,7 @@ archivesBaseName = ext.mod.id
 
 repositories {
     // Forgelin repository
-    maven { url = "http://mvn.rx14.co.uk/shadowfacts/" }
+    maven { url = "http://maven.shadowfacts.net/" }
 }
 
 // region Java Source Compat
@@ -68,7 +69,7 @@ minecraft {
 dependencies {
     // Kotlin dependencies
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "net.shadowfacts:Forgelin:1.4.1"
+    compile group: "net.shadowfacts", name: "Forgelin", version: "$forgelin_version"
 }
 
 processResources {

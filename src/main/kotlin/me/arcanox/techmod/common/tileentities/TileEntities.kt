@@ -5,9 +5,11 @@ import me.arcanox.techmod.common.proxy.IClientInitHandler
 import me.arcanox.techmod.common.proxy.IInitStageHandler
 import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
+import net.minecraft.client.renderer.texture.TextureManager
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraftforge.client.event.ModelBakeEvent
+import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.FMLCommonHandler
@@ -42,6 +44,8 @@ object TileEntities : IInitStageHandler, IClientInitHandler {
 	
 	@SubscribeEvent
 	fun onModelBake(e: ModelBakeEvent) {
+		Logger.info("Baking models for ${this.tesrs.size} TESRs");
+		
 		this.tesrs.forEach { (c, it) ->
 			try {
 				if (it is ITESRWithModels)

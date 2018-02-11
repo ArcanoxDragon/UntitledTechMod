@@ -15,12 +15,16 @@ import net.minecraft.util.ITickable
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
 @ModTileEntity(Constants.Blocks.AutomaticDoor)
 @HasTESR("TESRAutomaticDoor")
 class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
-	val TicksToOpen = 15;
-	val Range = 4; // blocks // TODO: make this configurable later
+	companion object {
+		const val TicksToOpen = 15;
+		const val Range = 4; // blocks // TODO: make this configurable later
+	}
 	
 	private var animTicks = 0;
 	private var readingNbt = false;
@@ -44,6 +48,9 @@ class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
 	override fun getRenderBoundingBox(): AxisAlignedBB = super.getRenderBoundingBox().expand(0.0, 1.0, 0.0)
 	
 	override fun getBlockType(): Block = BlockAutomaticDoor
+	
+	@SideOnly(Side.CLIENT)
+	override fun hasFastRenderer(): Boolean = false
 	
 	override fun update() {
 		if (this.open && this.animTicks < TicksToOpen) this.animTicks++;
@@ -75,7 +82,7 @@ class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
 				}
 				else            -> middleDoor
 			}
-			val entities = this.world.getEntitiesWithinAABB(EntityPlayer::class.java, this.checkAABB.move(checkPoint));
+			val entities = this.world.getEntitiesWithinAABB(EntityPlayer::class.java, this.checkAABB.offset(checkPoint));
 			val shouldBeOpen = entities.any();
 			
 			if (shouldBeOpen != this.open) {

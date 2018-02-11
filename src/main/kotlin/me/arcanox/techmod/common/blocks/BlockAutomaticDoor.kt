@@ -36,9 +36,9 @@ import java.util.*
 object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.GLASS) {
 	// region Constants
 	
-	private val FrameThickness = 2.0 / 16.0;
-	private val MountWidth = 6.0 / 16.0;
-	private val MountHeight = 1.0 / 16.0;
+	private const val FrameThickness = 2.0 / 16.0;
+	private const val MountWidth = 6.0 / 16.0;
+	private const val MountHeight = 1.0 / 16.0;
 	
 	private val CollisionBoxDoorWest = AxisAlignedBB(0.0, 0.0, 0.0,
 	                                                 FrameThickness, 1.0, 1.0)
@@ -119,8 +119,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	
 	override fun isNormalCube(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?): Boolean = false
 	
-	override fun isPassable(world: IBlockAccess, pos: BlockPos): Boolean
-		= world.getBlockState(pos).getActualState(world, pos).getValue(BlockDoor.OPEN)
+	override fun isPassable(world: IBlockAccess, pos: BlockPos): Boolean = world.getBlockState(pos).getActualState(world, pos).getValue(BlockDoor.OPEN)
 	
 	override fun isOpaqueCube(state: IBlockState?): Boolean = false
 	
@@ -223,20 +222,11 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 //	}
 */
 	
-	override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos): AxisAlignedBB {
-		val half = state.getValue(BlockDoor.HALF);
-		val box = super.getSelectedBoundingBox(state, world, pos);
-		
-		return when (half) {
-			BlockDoor.EnumDoorHalf.LOWER -> box.addCoord(0.0, 1.0 - MountHeight, 0.0)
-			else                         -> box.addCoord(0.0, -1.0, 0.0).contract(0.0, MountHeight, 0.0)
-		}
-	}
-	
 	override fun getBoundingBox(stateIn: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
 		val state = stateIn.getActualState(world, pos);
 		val open = state.getValue(BlockDoor.OPEN);
 		val hinge = state.getValue(BlockDoor.HINGE);
+		val half = state.getValue(BlockDoor.HALF);
 		val facing = state.getValue(BlockHorizontal.FACING);
 		val bbSide = when {
 			open -> when (hinge) {
@@ -246,11 +236,16 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 			else -> facing
 		};
 		
-		return when (bbSide) {
+		val rotatedBox = when (bbSide) {
 			EnumFacing.NORTH -> CollisionBoxDoorNorth
 			EnumFacing.EAST  -> CollisionBoxDoorEast
 			EnumFacing.SOUTH -> CollisionBoxDoorSouth
 			else             -> CollisionBoxDoorWest
+		}
+		
+		return when (half) {
+			BlockDoor.EnumDoorHalf.LOWER -> rotatedBox.expand(0.0, 1.0 - MountHeight, 0.0)
+			else                         -> rotatedBox.expand(0.0, -1.0, 0.0).contract(0.0, MountHeight, 0.0)
 		}
 	}
 	

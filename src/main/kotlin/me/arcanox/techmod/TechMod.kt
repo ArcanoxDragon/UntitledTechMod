@@ -14,7 +14,7 @@ object TechMod {
 	const val Name = "Tech Mod" // TODO: change these to actual name
 	const val ModID = "techmod" // TODO: change these to actual name
 	const val Version = "@VERSION@"
-	const val Dependencies = "required-after:forgelin;required-after:forge@[13.20.0.2285,)"
+	const val Dependencies = "required-after:forgelin;required-after:forge@[14.23.5.2768,)"
 	const val Adapter = "net.shadowfacts.forgelin.KotlinAdapter"
 	
 	@SidedProxy(

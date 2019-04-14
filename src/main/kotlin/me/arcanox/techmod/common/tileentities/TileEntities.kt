@@ -5,15 +5,11 @@ import me.arcanox.techmod.common.proxy.IClientInitHandler
 import me.arcanox.techmod.common.proxy.IInitStageHandler
 import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
-import net.minecraft.client.renderer.texture.TextureManager
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraftforge.client.event.ModelBakeEvent
-import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
-import net.minecraftforge.fml.common.FMLCommonHandler
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
@@ -28,7 +24,7 @@ object TileEntities : IInitStageHandler, IClientInitHandler {
 	private val tileEntities = ArrayList<Pair<KClass<out TileEntity>, ModTileEntity>>();
 	
 	@SideOnly(Side.CLIENT)
-	private val tesrs = emptyMap<KClass<out TileEntity>, TileEntitySpecialRenderer<in TileEntity>>().toMutableMap();
+	private val tesrs = mutableMapOf<KClass<out TileEntity>, TileEntitySpecialRenderer<in TileEntity>>();
 	
 	override fun onPreInit(e: FMLPreInitializationEvent) {
 		MinecraftForge.EVENT_BUS.register(this);

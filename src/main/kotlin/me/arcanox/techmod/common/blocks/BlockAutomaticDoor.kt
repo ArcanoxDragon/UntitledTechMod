@@ -228,14 +228,14 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 		val hinge = state.getValue(BlockDoor.HINGE);
 		val half = state.getValue(BlockDoor.HALF);
 		val facing = state.getValue(BlockHorizontal.FACING);
+		val hingeSide = when (hinge) {
+			BlockDoor.EnumHingePosition.LEFT -> facing.rotateY()
+			else                             -> facing.rotateYCCW()
+		};
 		val bbSide = when {
-			open -> when (hinge) {
-				BlockDoor.EnumHingePosition.LEFT -> facing.rotateY()
-				else                             -> facing.rotateYCCW()
-			}
+			open -> hingeSide
 			else -> facing
 		};
-		
 		val rotatedBox = when (bbSide) {
 			EnumFacing.NORTH -> CollisionBoxDoorNorth
 			EnumFacing.EAST  -> CollisionBoxDoorEast
@@ -268,8 +268,8 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 		val hingeSide = when (blockSide) {
 			EnumFacing.UP,
 			EnumFacing.DOWN  -> {
-				val oX = pFacing.frontOffsetX;
-				val oZ = pFacing.frontOffsetZ;
+				//val oX = pFacing.frontOffsetX;
+				//val oZ = pFacing.frontOffsetZ;
 				
 				BlockDoor.EnumHingePosition.LEFT;
 			}
@@ -296,11 +296,11 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	
 	// region Removing
 	
-	override fun getMobilityFlag(state: IBlockState?): EnumPushReaction = EnumPushReaction.DESTROY
+	override fun getPushReaction(state: IBlockState?) = EnumPushReaction.DESTROY
 	
 	override fun getItemDropped(state: IBlockState, rand: Random?, fortune: Int): Item {
 		return when (state.getValue(BlockDoor.HALF)) {
-			BlockDoor.EnumDoorHalf.LOWER -> API.blocks().getBlockItem(Constants.Blocks.AutomaticDoor)
+			BlockDoor.EnumDoorHalf.LOWER -> API.getInstance().blocks().getBlockItem(Constants.Blocks.AutomaticDoor)
 			else                         -> Items.AIR
 		}
 	}
@@ -308,9 +308,8 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	override fun onBlockHarvested(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer) {
 		val below = pos.down();
 		val above = pos.up();
-		val half = state.getValue(BlockDoor.HALF);
 		
-		when (half) {
+		when (state.getValue(BlockDoor.HALF)) {
 			BlockDoor.EnumDoorHalf.UPPER -> {
 				if (world.getBlockState(below).block === this) {
 					if (player.capabilities.isCreativeMode)
@@ -333,9 +332,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	// region Updates
 	
 	override fun neighborChanged(state: IBlockState, world: World, pos: BlockPos, blockChanged: Block, fromPos: BlockPos) {
-		val half = state.getValue(BlockDoor.HALF);
-		
-		when (half) {
+		when (state.getValue(BlockDoor.HALF)) {
 			BlockDoor.EnumDoorHalf.UPPER -> {
 				val below = pos.down();
 				val belowState = world.getBlockState(below);

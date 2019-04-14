@@ -11,7 +11,6 @@ import net.minecraft.world.ChunkCache
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
-import java.lang.UnsupportedOperationException
 
 
 abstract class BlockBase(name: String, material: Material) : Block(material) {
@@ -20,9 +19,9 @@ abstract class BlockBase(name: String, material: Material) : Block(material) {
 	
 	init {
 		this.apiName = name;
+		this.creativeTab = CreativeTab;
 		
 		this.setRegistryName(name);
-		this.setCreativeTab(CreativeTab);
 	}
 	
 	fun getTileEntitySafe(world: IBlockAccess, pos: BlockPos, state: IBlockState): TileEntity? {
@@ -31,12 +30,12 @@ abstract class BlockBase(name: String, material: Material) : Block(material) {
 			return null;
 		}
 		
-		val te = when (world) {
+		val tileEntity = when (world) {
 			is ChunkCache -> world.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK)
 			else          -> world.getTileEntity(pos)
 		}
 		
-		if (te == null) {
+		if (tileEntity == null) {
 			Logger.warn("Block ${this.registryName} at position $pos should have a TileEntity but it does not!");
 			
 			return when (world) {
@@ -45,8 +44,8 @@ abstract class BlockBase(name: String, material: Material) : Block(material) {
 			}
 		}
 		
-		return te;
+		return tileEntity;
 	}
 	
-	override fun getUnlocalizedName(): String = "tile.${this.registryName}";
+	override fun getTranslationKey() = "tile.${this.registryName}";
 }

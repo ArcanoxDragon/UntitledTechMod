@@ -6,5 +6,5 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
 object CreativeTab : CreativeTabs(CreativeTabs.getNextID(), TechMod.ModID) {
-	override fun getTabIconItem(): ItemStack = API.blocks().getBlockItemStack(Constants.Blocks.AutomaticDoor, 1);
+	override fun createIcon(): ItemStack = API.getInstance().blocks().getBlockItemStack(Constants.Blocks.AutomaticDoor, 1);
 }

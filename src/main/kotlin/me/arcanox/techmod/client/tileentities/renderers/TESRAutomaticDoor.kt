@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.BufferBuilder
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.block.model.ModelRotation
-import net.minecraft.client.renderer.vertex.VertexBuffer
-import net.minecraft.util.math.MathHelper
 import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.common.model.IModelState
 import net.minecraftforge.fml.relauncher.Side
@@ -21,15 +19,16 @@ object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
 	
 	@ModelLocation("block/automatic_door/mount")
 	var mapMount: Map<IModelState, IBakedModel>? = null;
+	
 	@ModelLocation("block/automatic_door/door")
 	var mapDoor: Map<IModelState, IBakedModel>? = null;
 	
-	override val renderPasses: Int = 21
+	override val renderPasses = 21
 	
-	override var requestedModelStates: List<IModelState> = listOf(ModelRotation.X0_Y0,
-	                                                              ModelRotation.X0_Y90,
-	                                                              ModelRotation.X0_Y180,
-	                                                              ModelRotation.X0_Y270)
+	override var requestedModelStates = listOf<IModelState>(ModelRotation.X0_Y0,
+	                                                        ModelRotation.X0_Y90,
+	                                                        ModelRotation.X0_Y180,
+	                                                        ModelRotation.X0_Y270)
 	
 	override fun transformInCube(te: TileEntityAutomaticDoor, x: Double, y: Double, z: Double, partialTicks: Float, renderPass: Int) {
 		if (!te.hasWorld()) return;
@@ -47,6 +46,7 @@ object TESRAutomaticDoor : TESRWithModels<TileEntityAutomaticDoor>() {
 		val half = state.getValue(BlockDoor.HALF);
 		val facing = state.getValue(BlockHorizontal.FACING);
 		val modelRot = ModelRotation.getModelRotation(0, facing.rotateYCCW().horizontalAngle.toInt());
+		
 		if (half == BlockDoor.EnumDoorHalf.UPPER) return;
 		
 		val model = when (renderPass) {

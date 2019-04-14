@@ -4,32 +4,53 @@ import me.arcanox.techmod.api.blocks.IBlockAPI;
 import me.arcanox.techmod.api.items.IItemAPI;
 import org.jetbrains.annotations.Contract;
 
-public class API {
-	static IBlockAPI blockAPI;
-	static IItemAPI  itemAPI;
-	static boolean   modLoaded;
+public class API implements IAPI {
+	// region Static
+	
+	// Initial state is an uninitialized instance
+	static final API instance = new API();
 	
 	@Contract( pure = true )
-	public static boolean isModLoaded() { return modLoaded; }
+	public static IAPI getInstance() {
+		return instance;
+	}
+	
+	// endregion
+	
+	private IBlockAPI blockApi;
+	private IItemAPI  itemApi;
+	private boolean   modLoaded;
+	
+	void initialize(IBlockAPI blockApi, IItemAPI itemApi) {
+		this.blockApi = blockApi;
+		this.itemApi = itemApi;
+		this.modLoaded = true;
+	}
+	
+	@Override
+	@Contract( pure = true )
+	public boolean isModLoaded() { return this.modLoaded; }
 	
 	// region Blocks
 	
+	@Override
 	@Contract( pure = true )
-	public static IItemAPI items() {
-		if ( !isModLoaded() ) return null;
+	public IItemAPI items() {
+		if ( !this.isModLoaded() ) return null;
 		
-		return itemAPI;
+		return this.itemApi;
 	}
 	
 	// endregion
 	
 	// region Items
 	
+	@Override
 	@Contract( pure = true )
-	public static IBlockAPI blocks() {
-		if ( !isModLoaded() ) return null;
+	public IBlockAPI blocks() {
+		if ( !this.isModLoaded() ) return null;
 		
-		return blockAPI;
+		return this.blockApi;
 	}
 	
 	// endregion

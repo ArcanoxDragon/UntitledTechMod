@@ -74,5 +74,5 @@ object ReflectionHelper {
 	                                                         annotationClass: KClass<A>,
 	                                                         supertype: KClass<C>,
 	                                                         new: (KClass<out C>) -> C = { it.objectInstance ?: it.createInstance() }): List<Pair<C, A>>
-		= getInstancesWithAnnotation(asmData, annotationClass.java, supertype.java, { jc -> new(jc.kotlin) })
+		= getInstancesWithAnnotation(asmData, annotationClass.java, supertype.java) { jc -> new(jc.kotlin) }
 }

@@ -5,6 +5,5 @@ import net.minecraft.item.ItemStack;
 
 public interface IItemAPI {
 	Item getItem( String name );
-	
 	ItemStack getItemStack( String name, int count );
 }

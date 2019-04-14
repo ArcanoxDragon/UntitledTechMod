@@ -16,15 +16,14 @@ import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 
 @InitHandler
 @ClientInitHandler
 object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
-	val blocks: MutableMap<String, Block> = mutableMapOf()
-	val blockItems: MutableMap<String, ItemBlock> = mutableMapOf()
+	val blocks = mutableMapOf<String, Block>()
+	val blockItems = mutableMapOf<String, ItemBlock>()
 	
 	init {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -61,7 +60,7 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 			e.registry.register(blockItem);
 		}
 		
-		if ( FMLCommonHandler.instance().side == Side.CLIENT )
+		if (FMLCommonHandler.instance().side == Side.CLIENT)
 			this.registerBlockItemModels();
 	}
 	

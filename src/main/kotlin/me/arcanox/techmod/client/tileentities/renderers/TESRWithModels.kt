@@ -15,8 +15,6 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraftforge.client.event.ModelBakeEvent
-import net.minecraftforge.client.event.ModelRegistryEvent
-import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
 import java.lang.reflect.Field
@@ -38,7 +36,7 @@ abstract class TESRWithModels<T : TileEntity> : TileEntitySpecialRenderer<T>(), 
 	
 	protected open var requestedModelStates = emptyList<IModelState>();
 	
-	protected fun renderModel(world: IBlockAccess, model: IBakedModel, blockState: IBlockState, pos: BlockPos): Unit {
+	protected fun renderModel(world: IBlockAccess, model: IBakedModel, blockState: IBlockState, pos: BlockPos) {
 		this.render.renderModel(world, model, blockState, pos, this.tessellator.buffer, false);
 	}
 	

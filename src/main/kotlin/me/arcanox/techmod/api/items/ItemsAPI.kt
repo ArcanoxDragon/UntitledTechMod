@@ -7,12 +7,11 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @InitHandler
 object ItemsAPI : IItemAPI, IInitStageHandler {
-	val items: MutableMap<String, Item> = mutableMapOf()
+	val items = mutableMapOf<String, Item>()
 	
 	init {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -32,6 +31,6 @@ object ItemsAPI : IItemAPI, IInitStageHandler {
 	override fun getItemStack(name: String, count: Int): ItemStack? {
 		if (name !in this.items) return null;
 		
-		return ItemStack(getItem(name), count);
+		return ItemStack(this.getItem(name)!!, count);
 	}
 }

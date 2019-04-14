@@ -64,7 +64,7 @@ class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
 		
 		if (canChangeState) {
 			val state = this.world.getBlockState(pos);
-			val middleDoor = this.pos.toVec3d().addVector(0.5, 1.0, 0.5);
+			val middleDoor = this.pos.toVec3d().add(0.5, 1.0, 0.5);
 			val hasDoorNeighbor = arrayOf(this.pos.north(),
 			                              this.pos.south(),
 			                              this.pos.east(),
@@ -78,7 +78,7 @@ class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
 						else                             -> facing.rotateY()
 					}
 					
-					middleDoor.addVector(offsetDir.frontOffsetX * 0.5, 0.0, offsetDir.frontOffsetZ * 0.5);
+					middleDoor.add(offsetDir.xOffset * 0.5, 0.0, offsetDir.zOffset * 0.5);
 				}
 				else            -> middleDoor
 			}

@@ -1,24 +1,20 @@
 package me.arcanox.techmod.api.items
 
-import me.arcanox.techmod.common.proxy.IInitStageHandler
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.reflect.InitHandler
+import me.arcanox.techmod.util.reflect.EventBusSubscriberObject
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
 
-@InitHandler
-object ItemsAPI : IItemAPI, IInitStageHandler {
+@EventBusSubscriberObject
+object ItemsAPI : IItemAPI {
 	val items = mutableMapOf<String, Item>()
 	
-	init {
-		MinecraftForge.EVENT_BUS.register(this);
-	}
-	
 	@SubscribeEvent
-	fun registerItems(e: RegistryEvent.Register<Item>): Unit {
+	fun registerItems(event: RegistryEvent.Register<Item>): Unit {
+		// TODO: Discover and register all Items
+		
 		Logger.info("Registering ${this.items.size} items...");
 	}
 	

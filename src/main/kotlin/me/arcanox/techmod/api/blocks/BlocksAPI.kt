@@ -1,82 +1,61 @@
 package me.arcanox.techmod.api.blocks
 
-import me.arcanox.techmod.common.blocks.base.BlockBase
-import me.arcanox.techmod.common.proxy.IClientInitHandler
-import me.arcanox.techmod.common.proxy.IInitStageHandler
+import me.arcanox.techmod.ItemGroup
+import me.arcanox.techmod.common.blocks.BlockBase
 import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
 import net.minecraft.block.Block
-import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
-import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
-import net.minecraftforge.client.model.ModelLoader
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.FMLCommonHandler
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.relauncher.Side
-import net.minecraftforge.fml.relauncher.SideOnly
+import net.minecraftforge.eventbus.api.SubscribeEvent
 
-@InitHandler
-@ClientInitHandler
-object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
+@EventBusSubscriberObject
+object BlocksAPI : IBlockAPI {
 	val blocks = mutableMapOf<String, Block>()
-	val blockItems = mutableMapOf<String, ItemBlock>()
+	val blockItems = mutableMapOf<String, BlockItem>()
 	
-	init {
-		MinecraftForge.EVENT_BUS.register(this);
-	}
+	// region Registration
 	
-	override fun onPreInit(e: FMLPreInitializationEvent) {
+	@SubscribeEvent
+	fun registerBlocks(event: RegistryEvent.Register<Block>) {
 		val discoveredBlocks = ReflectionHelper
-			.getInstancesWithAnnotation(e.asmData, ModBlock::class, BlockBase::class)
+			.getInstancesWithAnnotation(ModBlock::class, BlockBase::class)
 			.map { (block, _) -> Pair(block.apiName, block) };
 		
 		this.blocks += discoveredBlocks;
-	}
-	
-	@SubscribeEvent
-	fun registerBlocks(e: RegistryEvent.Register<Block>) {
+		
 		Logger.info("Registering ${this.blocks.size} blocks...");
 		
-		this.blocks.values.forEach { e.registry.register(it) };
+		this.blocks.values.forEach { event.registry.register(it) };
 	}
 	
 	@SubscribeEvent
-	fun registerBlockItems(e: RegistryEvent.Register<Item>) {
-		val blocksWithItems = this.blocks.filterValues { it.classHasAnnotation<HasItemBlock>() };
+	fun registerBlockItems(event: RegistryEvent.Register<Item>) {
+		val blocksWithItems = this.blocks.filterValues { it.classHasAnnotation<HasBlockItem>() };
 		
 		Logger.info("Registering ${blocksWithItems.size} block items...");
 		
-		// Only block classes with @HasItemBlock directly applied to them will automatically receive ItemBlocks
-		for ((name, block) in blocksWithItems) {
-			val blockItem = ItemBlock(block)
-			
-			blockItem.registryName = block.registryName;
+		// Only block classes with @HasBlockItem directly applied to them will automatically receive BlockItems
+		val blockItems = blocksWithItems.map { (name, block) ->
+			val annotation = block.javaClass.getDeclaredAnnotation(HasBlockItem::class.java);
+			val blockItem = BlockItem(
+				block,
+				Item.Properties().group(ItemGroup).maxStackSize(annotation.maxStackSize)
+			).apply { registryName = block.registryName; };
 			
 			this.blockItems += Pair(name, blockItem);
-			e.registry.register(blockItem);
-		}
+			
+			return@map blockItem;
+		};
 		
-		if (FMLCommonHandler.instance().side == Side.CLIENT)
-			this.registerBlockItemModels();
+		event.registry.registerAll(*blockItems.toTypedArray());
 	}
 	
-	@SideOnly(Side.CLIENT)
-	fun registerBlockItemModels() {
-		val blockItemsWithModel = this.blocks
-			.filter { this.blockItems.containsKey(it.key) }
-			.filter { it.value.classHasAnnotation<HasItemModel>() };
-		
-		Logger.info("Registering models for ${blockItemsWithModel.size} block items...");
-		
-		blockItemsWithModel.forEach { (name, block) ->
-			val blockItem = this.blockItems[name]!!;
-			ModelLoader.setCustomModelResourceLocation(blockItem, 0, ModelResourceLocation(block.registryName.toString()));
-		}
-	}
+	// endregion Registration
+	
+	// region IBlockAPI contract
 	
 	override fun getBlock(name: String): Block? {
 		if (name !in this.blocks) return null;
@@ -84,7 +63,7 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 		return this.blocks[name];
 	}
 	
-	override fun getBlockItem(name: String): ItemBlock? {
+	override fun getBlockItem(name: String): BlockItem? {
 		if (name !in this.blockItems) return null;
 		
 		return this.blockItems[name];
@@ -95,4 +74,6 @@ object BlocksAPI : IBlockAPI, IInitStageHandler, IClientInitHandler {
 		
 		return ItemStack(this.getBlock(name)!!, count);
 	}
+	
+	// endregion IBlockAPI contract
 }

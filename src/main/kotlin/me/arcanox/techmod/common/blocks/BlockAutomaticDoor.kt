@@ -2,38 +2,46 @@ package me.arcanox.techmod.common.blocks
 
 import me.arcanox.techmod.api.API
 import me.arcanox.techmod.api.Constants
-import me.arcanox.techmod.common.blocks.base.BlockBase
 import me.arcanox.techmod.common.tileentities.TileEntityAutomaticDoor
-import me.arcanox.techmod.util.reflect.HasItemBlock
+import me.arcanox.techmod.util.reflect.HasBlockItem
 import me.arcanox.techmod.util.reflect.HasItemModel
 import me.arcanox.techmod.util.reflect.ModBlock
 import net.minecraft.block.Block
-import net.minecraft.block.BlockDoor
-import net.minecraft.block.BlockHorizontal
-import net.minecraft.block.material.EnumPushReaction
+import net.minecraft.block.BlockState
+import net.minecraft.block.Blocks
 import net.minecraft.block.material.Material
-import net.minecraft.block.state.BlockStateContainer
-import net.minecraft.block.state.IBlockState
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.init.Items
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.pathfinding.PathType
+import net.minecraft.state.StateContainer
+import net.minecraft.state.properties.BlockStateProperties.*
+import net.minecraft.state.properties.DoorHingeSide
+import net.minecraft.state.properties.DoubleBlockHalf
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.BlockRenderLayer
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumHand
+import net.minecraft.util.ActionResultType
+import net.minecraft.util.Direction
+import net.minecraft.util.Hand
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
-import net.minecraft.world.IBlockAccess
+import net.minecraft.util.math.BlockRayTraceResult
+import net.minecraft.world.IBlockReader
+import net.minecraft.world.IWorld
 import net.minecraft.world.World
+import net.minecraftforge.common.ToolType
 import java.util.*
 
 @ModBlock
-@HasItemBlock
+@HasBlockItem
 @HasItemModel
-object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.GLASS) {
+object BlockAutomaticDoor : BlockBase(
+	Constants.Blocks.AutomaticDoor,
+	Block.Properties
+		.create(Material.GLASS)
+		.hardnessAndResistance(4.0f)
+		.harvestTool(ToolType.PICKAXE)
+		.harvestLevel(Blocks.IRON_DOOR.getHarvestLevel(Blocks.IRON_DOOR.defaultState))
+) {
 	// region Constants
 	
 	private const val FrameThickness = 2.0 / 16.0;
@@ -52,62 +60,37 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	// endregion
 	
 	init {
-		setLightOpacity(0);
-		setHardness(4.0f);
-		setHarvestLevel("pickaxe", Blocks.IRON_DOOR.getHarvestLevel(Blocks.IRON_DOOR.defaultState));
-		
-		defaultState = this.blockState.baseState
-			.withProperty(BlockHorizontal.FACING, EnumFacing.WEST)
-			.withProperty(BlockDoor.OPEN, false)
-			.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.LOWER)
-			.withProperty(BlockDoor.HINGE, BlockDoor.EnumHingePosition.LEFT);
+		defaultState = this.stateContainer.baseState
+			.with(HORIZONTAL_FACING, Direction.WEST)
+			.with(OPEN, false)
+			.with(DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
+			.with(DOOR_HINGE, DoorHingeSide.LEFT);
 	}
 	
 	// region State
 	
-	override fun createBlockState(): BlockStateContainer = BlockStateContainer(this,
-	                                                                           BlockHorizontal.FACING,
-	                                                                           BlockDoor.OPEN,
-	                                                                           BlockDoor.HALF,
-	                                                                           BlockDoor.HINGE);
-	
-	override fun getStateFromMeta(meta: Int): IBlockState {
-		val hinge = (meta and 0b1_0_00) shr 3;
-		val half = ((meta and 0b0_1_00)) shr 2;
-		val facing = meta and 0b0_0_11;
-		
-		return this.defaultState
-			.withProperty(BlockHorizontal.FACING, EnumFacing.HORIZONTALS[facing])
-			.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.values()[half])
-			.withProperty(BlockDoor.HINGE, BlockDoor.EnumHingePosition.values()[hinge]);
+	override fun fillStateContainer(builder: StateContainer.Builder<Block, BlockState>) {
+		builder.add(HORIZONTAL_FACING, OPEN, DOUBLE_BLOCK_HALF, DOOR_HINGE);
 	}
 	
-	override fun getMetaFromState(state: IBlockState): Int {
-		val facing = EnumFacing.HORIZONTALS.indexOf(state.getValue(BlockHorizontal.FACING));
-		val half = state.getValue(BlockDoor.HALF).ordinal;
-		val hinge = state.getValue(BlockDoor.HINGE).ordinal;
+	override fun updatePostPlacement(stateIn: BlockState, facing: Direction, facingState: BlockState, world: IWorld, currentPos: BlockPos, facingPos: BlockPos): BlockState = stateIn.let {
+		val half = it.get(DOUBLE_BLOCK_HALF);
 		
-		return (facing) +
-		       (half shl 2) +
-		       (hinge shl 3);
-	}
-	
-	override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
-		val half = state.getValue(BlockDoor.HALF);
-		
-		return when (half) {
-			BlockDoor.EnumDoorHalf.LOWER -> {
-				val te = this.getTileEntitySafe(world, pos, state) as TileEntityAutomaticDoor;
-				state.withProperty(BlockDoor.OPEN, te.open);
+		when (half) {
+			DoubleBlockHalf.LOWER -> {
+				val te = this.getTileEntitySafe(world, currentPos, it) as TileEntityAutomaticDoor;
+				
+				it.with(OPEN, te.open);
 			}
-			else                         -> {
-				val belowState = world.getBlockState(pos.down());
+			DoubleBlockHalf.UPPER -> {
+				val belowState = world.getBlockState(currentPos.down());
 				
 				if (belowState.block === this)
-					state.withProperty(BlockDoor.OPEN, belowState.getValue(BlockDoor.OPEN));
+					it.with(OPEN, belowState.get(OPEN));
 				else
-					state;
+					it;
 			}
+			else                  -> it
 		}
 	}
 	
@@ -115,32 +98,22 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	
 	// region Rendering/Lighting
 	
-	override fun isFullCube(state: IBlockState?): Boolean = false
+	override fun allowsMovement(state: BlockState, worldIn: IBlockReader, pos: BlockPos, type: PathType): Boolean = when (type) {
+		PathType.LAND  -> state.get(OPEN);
+		PathType.AIR   -> state.get(OPEN);
+		PathType.WATER -> false;
+	}
 	
-	override fun isNormalCube(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?): Boolean = false
-	
-	override fun isPassable(world: IBlockAccess, pos: BlockPos): Boolean = world.getBlockState(pos).getActualState(world, pos).getValue(BlockDoor.OPEN)
-	
-	override fun isOpaqueCube(state: IBlockState?): Boolean = false
-	
-	override fun doesSideBlockRendering(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?, face: EnumFacing?): Boolean = false
-	
-	override fun canRenderInLayer(state: IBlockState, layer: BlockRenderLayer): Boolean = false /*{
-		if (layer != BlockRenderLayer.CUTOUT) return false;
-		
-		val half = state.getValue(BlockDoor.HALF);
-		
-		return half == BlockDoor.EnumDoorHalf.LOWER;
-	}*/
+	override fun isSideInvisible(state: BlockState, adjacentBlockState: BlockState, side: Direction): Boolean = false
 	
 	// endregion
 	
 	// region Interaction
 	
-	override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+	override fun onBlockActivated(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, handIn: Hand, rayTraceResult: BlockRayTraceResult): ActionResultType {
 //		if (world.isRemote) return true;
 //
-//		val half = state.getValue(BlockDoor.HALF);
+//		val half = state.getValue(DOUBLE_BLOCK_HALF);
 //
 //		return when (half) {
 //			BlockDoor.EnumDoorHalf.UPPER -> {
@@ -159,8 +132,9 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 //				true;
 //			}
 //		}
+		
 		// TODO: Open some sort of GUI later
-		return super.onBlockActivated(world, pos, state, player, hand, facing, hitX, hitY, hitZ);
+		return super.onBlockActivated(state, world, pos, player, handIn, rayTraceResult);
 	}
 	
 	// endregion
@@ -173,7 +147,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 //
 //		val box = this.getBoundingBox(state, world, pos).offset(pos);
 //		return box;
-//		val half = state.getValue(BlockDoor.HALF);
+//		val half = state.getValue(DOUBLE_BLOCK_HALF);
 //		var partHit = SelectedAABB.Frame;
 //
 //		val result = when (half) {
@@ -226,7 +200,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 		val state = stateIn.getActualState(world, pos);
 		val open = state.getValue(BlockDoor.OPEN);
 		val hinge = state.getValue(BlockDoor.HINGE);
-		val half = state.getValue(BlockDoor.HALF);
+		val half = state.getValue(DOUBLE_BLOCK_HALF);
 		val facing = state.getValue(BlockHorizontal.FACING);
 		val hingeSide = when (hinge) {
 			BlockDoor.EnumHingePosition.LEFT -> facing.rotateY()
@@ -285,11 +259,11 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState, placer: EntityLivingBase, stack: ItemStack) {
 		if (world.isRemote) return;
 		
-		val placedHalf = state.getValue(BlockDoor.HALF);
+		val placedHalf = state.getValue(DOUBLE_BLOCK_HALF);
 		
 		if (placedHalf == BlockDoor.EnumDoorHalf.UPPER) return;
 		
-		world.setBlockState(pos.up(), state.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER));
+		world.setBlockState(pos.up(), state.withProperty(DOUBLE_BLOCK_HALF, BlockDoor.EnumDoorHalf.UPPER));
 	}
 	
 	// endregion
@@ -299,7 +273,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	override fun getPushReaction(state: IBlockState?) = EnumPushReaction.DESTROY
 	
 	override fun getItemDropped(state: IBlockState, rand: Random?, fortune: Int): Item {
-		return when (state.getValue(BlockDoor.HALF)) {
+		return when (state.getValue(DOUBLE_BLOCK_HALF)) {
 			BlockDoor.EnumDoorHalf.LOWER -> API.getInstance().blocks().getBlockItem(Constants.Blocks.AutomaticDoor)
 			else                         -> Items.AIR
 		}
@@ -309,7 +283,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 		val below = pos.down();
 		val above = pos.up();
 		
-		when (state.getValue(BlockDoor.HALF)) {
+		when (state.getValue(DOUBLE_BLOCK_HALF)) {
 			BlockDoor.EnumDoorHalf.UPPER -> {
 				if (world.getBlockState(below).block === this) {
 					if (player.capabilities.isCreativeMode)
@@ -332,7 +306,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	// region Updates
 	
 	override fun neighborChanged(state: IBlockState, world: World, pos: BlockPos, blockChanged: Block, fromPos: BlockPos) {
-		when (state.getValue(BlockDoor.HALF)) {
+		when (state.getValue(DOUBLE_BLOCK_HALF)) {
 			BlockDoor.EnumDoorHalf.UPPER -> {
 				val below = pos.down();
 				val belowState = world.getBlockState(below);
@@ -375,7 +349,7 @@ object BlockAutomaticDoor : BlockBase(Constants.Blocks.AutomaticDoor, Material.G
 	
 	// region Tile Entity
 	
-	override fun hasTileEntity(state: IBlockState): Boolean = state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER
+	override fun hasTileEntity(state: IBlockState): Boolean = state.getValue(DOUBLE_BLOCK_HALF) == BlockDoor.EnumDoorHalf.LOWER
 	
 	override fun createTileEntity(world: World, state: IBlockState): TileEntity = TileEntityAutomaticDoor().also {
 		it.open = state.getValue(BlockDoor.OPEN);

@@ -1,26 +1,30 @@
 package me.arcanox.techmod.common.tileentities
 
+import com.google.common.base.Predicates
 import me.arcanox.techmod.api.Constants
+import me.arcanox.techmod.client.tileentities.renderers.AutomaticDoorTileRenderer
 import me.arcanox.techmod.common.blocks.BlockAutomaticDoor
-import me.arcanox.techmod.util.reflect.HasTESR
+import me.arcanox.techmod.util.extensions.cardinals
+import me.arcanox.techmod.util.reflect.HasTileEntityRenderer
 import me.arcanox.techmod.util.reflect.ModTileEntity
 import me.arcanox.techmod.util.toVec3d
-import net.minecraft.block.Block
-import net.minecraft.block.BlockDoor
-import net.minecraft.block.BlockHorizontal
-import net.minecraft.block.state.IBlockState
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ITickable
+import net.minecraft.client.renderer.texture.ITickable
+import net.minecraft.entity.EntityType
+import net.minecraft.nbt.CompoundNBT
+import net.minecraft.state.properties.BlockStateProperties
+import net.minecraft.state.properties.DoorHingeSide
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.AxisAlignedBB
-import net.minecraft.util.math.BlockPos
-import net.minecraft.world.World
-import net.minecraftforge.fml.relauncher.Side
-import net.minecraftforge.fml.relauncher.SideOnly
+import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.api.distmarker.OnlyIn
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 
-@ModTileEntity(Constants.Blocks.AutomaticDoor)
-@HasTESR("TESRAutomaticDoor")
-class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
+@ModTileEntity(Constants.Blocks.AutomaticDoor, BlockAutomaticDoor::class)
+@HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
+class TileEntityAutomaticDoor(type: TileEntityType<in TileEntity>) : TileEntityBase(type), ITickable {
 	companion object {
 		const val TicksToOpen = 15;
 		const val Range = 4; // blocks // TODO: make this configurable later
@@ -40,70 +44,64 @@ class TileEntityAutomaticDoor : TileEntityBase(), ITickable {
 			this.open -> this.animTicks + partialTicks
 			else      -> this.animTicks - partialTicks
 		};
-		val progress = Math.max(Math.min(fTicks / TicksToOpen.toFloat(), 1.0f), 0.0f);
-		val eased = (Math.cos(progress.toDouble() * Math.PI + Math.PI) + 1.0f).toFloat() / 2.0f;
+		val progress = max(min(fTicks / TicksToOpen.toFloat(), 1.0f), 0.0f);
+		val eased = (cos(progress.toDouble() * Math.PI + Math.PI) + 1.0f).toFloat() / 2.0f;
 		return 90.0f * eased;
 	}
 	
 	override fun getRenderBoundingBox(): AxisAlignedBB = super.getRenderBoundingBox().expand(0.0, 1.0, 0.0)
 	
-	override fun getBlockType(): Block = BlockAutomaticDoor
-	
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	override fun hasFastRenderer(): Boolean = false
 	
-	override fun update() {
+	override fun tick() {
 		if (this.open && this.animTicks < TicksToOpen) this.animTicks++;
 		if (!this.open && this.animTicks > 0) this.animTicks--;
 		
-		if (this.world.isRemote) return;
+		val world = this.world!!;
 		
-		if (world.getBlockState(this.pos).block !== this.getBlockType()) return; // wtf
+		if (world.isRemote) return;
 		
 		val canChangeState = this.animTicks == 0 || this.animTicks == TicksToOpen;
 		
 		if (canChangeState) {
-			val state = this.world.getBlockState(pos);
+			val state = world.getBlockState(pos);
 			val middleDoor = this.pos.toVec3d().add(0.5, 1.0, 0.5);
-			val hasDoorNeighbor = arrayOf(this.pos.north(),
-			                              this.pos.south(),
-			                              this.pos.east(),
-			                              this.pos.west()).any { world.getBlockState(it).block === this.getBlockType() };
+			val hasDoorNeighbor = this.pos.cardinals().any { world.getBlockState(it).block === this.blockState };
 			val checkPoint = when {
 				hasDoorNeighbor -> {
-					val facing = state.getValue(BlockHorizontal.FACING);
-					val hinge = state.getValue(BlockDoor.HINGE);
+					val facing = state.get(BlockStateProperties.FACING);
+					val hinge = state.get(BlockStateProperties.DOOR_HINGE);
 					val offsetDir = when (hinge) {
-						BlockDoor.EnumHingePosition.LEFT -> facing.rotateYCCW()
-						else                             -> facing.rotateY()
+						DoorHingeSide.LEFT  -> facing.rotateYCCW()
+						DoorHingeSide.RIGHT -> facing.rotateY()
+						else                -> facing
 					}
 					
 					middleDoor.add(offsetDir.xOffset * 0.5, 0.0, offsetDir.zOffset * 0.5);
 				}
 				else            -> middleDoor
 			}
-			val entities = this.world.getEntitiesWithinAABB(EntityPlayer::class.java, this.checkAABB.offset(checkPoint));
+			val entities = world.getEntitiesWithinAABB(EntityType.PLAYER, this.checkAABB.offset(checkPoint), Predicates.alwaysTrue());
 			val shouldBeOpen = entities.any();
 			
 			if (shouldBeOpen != this.open) {
 				this.open = shouldBeOpen;
-				this.world.setBlockState(this.pos, state.withProperty(BlockDoor.OPEN, this.open));
+				world.setBlockState(this.pos, state.with(BlockStateProperties.OPEN, this.open));
+				this.markDirty();
 			}
 		}
 	}
 	
-	override fun getUpdateTag(): NBTTagCompound = super.getUpdateTag().also {
-		it.setBoolean("open", this.open)
+	override fun getUpdateTag(): CompoundNBT = super.getUpdateTag().also {
+		it.putBoolean("open", this.open)
 	}
 	
-	override fun handleUpdateTag(tag: NBTTagCompound) {
+	override fun handleUpdateTag(tag: CompoundNBT) {
 		super.handleUpdateTag(tag);
+		
 		this.readingNbt = true;
-		
 		this.open = tag.getBoolean("open");
-		
 		this.readingNbt = false;
 	}
-	
-	override fun shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState): Boolean = oldState.block !== newState.block;
 }

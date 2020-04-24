@@ -42,6 +42,4 @@ abstract class BlockBase(name: String, properties: Properties) : Block(propertie
 		
 		return tileEntity;
 	}
-	
-	override fun getTranslationKey() = "tile.${this.registryName}";
 }

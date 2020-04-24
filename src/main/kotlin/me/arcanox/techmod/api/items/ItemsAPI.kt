@@ -1,13 +1,13 @@
 package me.arcanox.techmod.api.items
 
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.reflect.EventBusSubscriberObject
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.common.Mod
 
-@EventBusSubscriberObject
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 object ItemsAPI : IItemAPI {
 	val items = mutableMapOf<String, Item>()
 	

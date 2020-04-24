@@ -3,18 +3,16 @@ package me.arcanox.techmod.common.tileentities
 import com.google.common.base.Predicates
 import me.arcanox.techmod.api.Constants
 import me.arcanox.techmod.client.tileentities.renderers.AutomaticDoorTileRenderer
-import me.arcanox.techmod.common.blocks.BlockAutomaticDoor
+import me.arcanox.techmod.common.blocks.AutomaticDoorBlock
 import me.arcanox.techmod.util.extensions.cardinals
 import me.arcanox.techmod.util.reflect.HasTileEntityRenderer
 import me.arcanox.techmod.util.reflect.ModTileEntity
 import me.arcanox.techmod.util.toVec3d
-import net.minecraft.client.renderer.texture.ITickable
 import net.minecraft.entity.EntityType
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.state.properties.BlockStateProperties
 import net.minecraft.state.properties.DoorHingeSide
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.tileentity.TileEntityType
+import net.minecraft.tileentity.ITickableTileEntity
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
@@ -22,9 +20,9 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 
-@ModTileEntity(Constants.Blocks.AutomaticDoor, BlockAutomaticDoor::class)
+@ModTileEntity(Constants.Blocks.AutomaticDoor, AutomaticDoorBlock::class)
 @HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
-class TileEntityAutomaticDoor(type: TileEntityType<in TileEntity>) : TileEntityBase(type), ITickable {
+class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
 	companion object {
 		const val TicksToOpen = 15;
 		const val Range = 4; // blocks // TODO: make this configurable later
@@ -42,7 +40,7 @@ class TileEntityAutomaticDoor(type: TileEntityType<in TileEntity>) : TileEntityB
 	fun getRotation(partialTicks: Float = 0.0f): Float {
 		val fTicks = when {
 			this.open -> this.animTicks + partialTicks
-			else      -> this.animTicks - partialTicks
+			else -> this.animTicks - partialTicks
 		};
 		val progress = max(min(fTicks / TicksToOpen.toFloat(), 1.0f), 0.0f);
 		val eased = (cos(progress.toDouble() * Math.PI + Math.PI) + 1.0f).toFloat() / 2.0f;
@@ -80,7 +78,7 @@ class TileEntityAutomaticDoor(type: TileEntityType<in TileEntity>) : TileEntityB
 					
 					middleDoor.add(offsetDir.xOffset * 0.5, 0.0, offsetDir.zOffset * 0.5);
 				}
-				else            -> middleDoor
+				else -> middleDoor
 			}
 			val entities = world.getEntitiesWithinAABB(EntityType.PLAYER, this.checkAABB.offset(checkPoint), Predicates.alwaysTrue());
 			val shouldBeOpen = entities.any();

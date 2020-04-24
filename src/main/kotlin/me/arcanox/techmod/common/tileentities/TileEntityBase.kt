@@ -5,7 +5,7 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.tileentity.TileEntityType
 
-abstract class TileEntityBase(type: TileEntityType<in TileEntity>) : TileEntity(type) {
+abstract class TileEntityBase(type: TileEntityType<out TileEntity>) : TileEntity(type) {
 	override fun getUpdatePacket(): SUpdateTileEntityPacket? {
 		val root = this.updateTag;
 		return SUpdateTileEntityPacket(this.pos, 1, root);

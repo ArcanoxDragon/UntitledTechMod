@@ -7,9 +7,6 @@ import kotlin.reflect.KClass
 // region Initialization
 
 @Target(AnnotationTarget.CLASS)
-annotation class EventBusSubscriberObject()
-
-@Target(AnnotationTarget.CLASS)
 annotation class InitHandler(val priority: Int = 5)
 
 @Target(AnnotationTarget.CLASS)

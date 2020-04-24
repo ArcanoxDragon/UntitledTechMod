@@ -2,6 +2,7 @@ package me.arcanox.techmod.util.reflect
 
 import me.arcanox.techmod.util.Logger
 import net.minecraftforge.fml.ModList
+import org.objectweb.asm.Type
 import java.lang.reflect.AnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -16,29 +17,38 @@ inline fun <reified T : Annotation> KClass<*>.hasAnnotation(declaredOnly: Boolea
 inline fun <reified T : Annotation> Any.classHasAnnotation(declaredOnly: Boolean = true): Boolean = this.javaClass.hasAnnotation<T>(declaredOnly)
 
 object ReflectionHelper {
-	fun <C, A : Annotation> getClassesWithAnnotation(annotationClass: Class<A>,
-	                                                 supertype: Class<C>): List<Pair<Class<out C>, A>> {
+	fun <C, A : Annotation> getClassesWithAnnotation(annotationClass: Class<A>, supertype: Class<C>): List<Pair<Class<out C>, A>> {
+		val annotationType = Type.getType(annotationClass);
 		val allScanData = ModList.get().allScanData;
 		
 		return allScanData.flatMap { scanData ->
-			return@flatMap scanData.classes.map { classData ->
-				val discoveredClass = classData.javaClass;
-				val typed = discoveredClass.asSubclass(supertype);
-				
-				if (typed == null) {
-					Logger.warn("Found a class with annotation ${annotationClass.canonicalName} of type ${discoveredClass.canonicalName}, which cannot be converted to requested type ${supertype.canonicalName}");
-					return@map null;
+			scanData.annotations
+				.filter { it.annotationType == annotationType }
+				.map { annotationData ->
+					val className = annotationData.memberName;
+					val typed: Class<out C>;
+					
+					try {
+						val discoveredClass = Class.forName(className);
+						
+						typed = discoveredClass.asSubclass(supertype);
+					} catch (ex: ClassNotFoundException) {
+						Logger.warn("Could not retrieve class handle for class in ASM data table: $className")
+						return@map null;
+					} catch (ex: Exception) {
+						Logger.warn("Found a class with annotation ${annotationClass.canonicalName} of type $className, which cannot be converted to requested type ${supertype.canonicalName}");
+						return@map null;
+					}
+					
+					val annotation = typed.getDeclaredAnnotation(annotationClass);
+					
+					if (annotation == null) {
+						Logger.warn("Class $className has annotation ${annotationClass.canonicalName} through inheritance, but the annotation is not declared explicitly on the class");
+						return@map null;
+					}
+					
+					return@map Pair(typed, annotation);
 				}
-				
-				val annotation = typed.getDeclaredAnnotation(annotationClass);
-				
-				if (annotation == null) {
-					Logger.warn("Class ${discoveredClass.name} has annotation ${annotationClass.canonicalName} through inheritance, but the annotation is not declared explicitly on the class");
-					return@map null;
-				}
-				
-				return@map Pair(typed, annotation);
-			}
 		}.filterNotNull();
 	}
 	

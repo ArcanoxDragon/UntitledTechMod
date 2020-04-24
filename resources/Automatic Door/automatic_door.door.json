@@ -6,67 +6,67 @@
 	"elements": [ 	 
 		{
 			"__comment": "Door Frame N",
-			"from": [ 0, 0, 0 ],
-			"to": [ 2, 31, 1 ],
+			"from": [ 15, 0, 0 ],
+			"to": [ 16, 31, 2 ],
 			"faces": {
-				"down": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"up": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"north": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
-				"south": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
-				"west": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
-				"east": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" }
+				"down": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture", "rotation": 270 },
+				"up": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture", "rotation": 90 },
+				"north": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
+				"south": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
+				"west": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
+				"east": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" }
 			}
 		},
 		{
 			"__comment": "Door Frame B",
-			"from": [ 0, 0, 1 ],
-			"to": [ 2, 1, 15 ],
+			"from": [ 1, 0, 0 ],
+			"to": [ 15, 1, 2 ],
 			"faces": {
-				"down": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture" },
-				"up": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture" },
-				"north": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"south": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"west": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
-				"east": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" }
+				"down": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture", "rotation": 270 },
+				"up": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture", "rotation": 90 },
+				"north": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
+				"south": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
+				"west": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
+				"east": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" }
 			}
 		},
 		{
 			"__comment": "Door Frame S",
-			"from": [ 0, 0, 15 ],
-			"to": [ 2, 31, 16 ],
+			"from": [ 0, 0, 0 ],
+			"to": [ 1, 31, 2 ],
 			"faces": {
-				"down": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"up": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"north": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
-				"south": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
-				"west": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
-				"east": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" }
+				"down": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture", "rotation": 270 },
+				"up": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture", "rotation": 90 },
+				"north": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
+				"south": { "uv": [ 8, 0, 8.5, 15.5 ], "texture": "#texture" },
+				"west": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" },
+				"east": { "uv": [ 8, 0, 9, 15.5 ], "texture": "#texture" }
 			}
 		},
 		{
 			"__comment": "Door Frame T",
-			"from": [ 0, 30, 1 ],
-			"to": [ 2, 31, 15 ],
+			"from": [ 1, 30, 0 ],
+			"to": [ 15, 31, 2 ],
 			"faces": {
-				"down": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture" },
-				"up": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture" },
-				"north": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"south": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
-				"west": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
-				"east": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" }
+				"down": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture", "rotation": 270 },
+				"up": { "uv": [ 8.5, 0, 15.5, 1 ], "texture": "#texture", "rotation": 90 },
+				"north": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
+				"south": { "uv": [ 8.5, 0, 15.5, 0.5 ], "texture": "#texture" },
+				"west": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" },
+				"east": { "uv": [ 8, 0, 9, 0.5 ], "texture": "#texture" }
 			}
 		},
 		{
 			"__comment": "Door Window",
-			"from": [ 0, 1, 1 ],
-			"to": [ 2, 30, 15 ],
+			"from": [ 1, 1, 0 ],
+			"to": [ 15, 30, 2 ],
 			"faces": {
-				"down": { "uv": [ 0, 0, 8, 0.5 ], "texture": "#texture", "rotation": 270 },
-				"up": { "uv": [ 0, 0, 8, 0.5 ], "texture": "#texture", "rotation": 270 },
-				"north": { "uv": [ 0, 0, 0.5, 16 ], "texture": "#texture" },
-				"south": { "uv": [ 0, 0, 0.5, 16 ], "texture": "#texture" },
-				"west": { "uv": [ 0, 0, 8, 16 ], "texture": "#texture" },
-				"east": { "uv": [ 0, 0, 8, 16 ], "texture": "#texture" }
+				"down": { "uv": [ 0, 0, 8, 0.5 ], "texture": "#texture", "rotation": 180 },
+				"up": { "uv": [ 0, 0, 8, 0.5 ], "texture": "#texture" },
+				"north": { "uv": [ 0, 0, 8, 16 ], "texture": "#texture" },
+				"south": { "uv": [ 0, 0, 8, 16 ], "texture": "#texture" },
+				"west": { "uv": [ 0, 0, 0.5, 16 ], "texture": "#texture" },
+				"east": { "uv": [ 0, 0, 0.5, 16 ], "texture": "#texture" }
 			}
 		}
 	],

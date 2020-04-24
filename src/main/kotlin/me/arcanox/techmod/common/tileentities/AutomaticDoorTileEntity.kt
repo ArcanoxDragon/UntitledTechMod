@@ -4,7 +4,7 @@ import com.google.common.base.Predicates
 import me.arcanox.techmod.api.Constants
 import me.arcanox.techmod.client.tileentities.renderers.AutomaticDoorTileRenderer
 import me.arcanox.techmod.common.blocks.AutomaticDoorBlock
-import me.arcanox.techmod.util.extensions.cardinals
+import me.arcanox.techmod.util.extensions.horizontalNeighbors
 import me.arcanox.techmod.util.reflect.HasTileEntityRenderer
 import me.arcanox.techmod.util.reflect.ModTileEntity
 import me.arcanox.techmod.util.toVec3d
@@ -65,7 +65,7 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 		if (canChangeState) {
 			val state = world.getBlockState(pos);
 			val middleDoor = this.pos.toVec3d().add(0.5, 1.0, 0.5);
-			val hasDoorNeighbor = this.pos.cardinals().any { world.getBlockState(it).block === this.blockState };
+			val hasDoorNeighbor = this.pos.horizontalNeighbors().any { world.getBlockState(it).block === this.blockState };
 			val checkPoint = when {
 				hasDoorNeighbor -> {
 					val facing = state.get(BlockStateProperties.FACING);

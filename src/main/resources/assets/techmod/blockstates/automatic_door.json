@@ -1,19 +1,19 @@
 {
   "multipart": [
     {
-      "when": { "half": "lower", "facing": "east" },
+      "when": { "half": "lower", "facing": "south" },
       "apply": { "model": "techmod:block/automatic_door/mount" }
     },
     {
-      "when": { "half": "lower", "facing": "south" },
+      "when": { "half": "lower", "facing": "west" },
       "apply": { "model": "techmod:block/automatic_door/mount", "y": 90 }
     },
     {
-      "when": { "half": "lower", "facing": "west" },
+      "when": { "half": "lower", "facing": "north" },
       "apply": { "model": "techmod:block/automatic_door/mount", "y": 180 }
     },
     {
-      "when": { "half": "lower", "facing": "north" },
+      "when": { "half": "lower", "facing": "east" },
       "apply": { "model": "techmod:block/automatic_door/mount", "y": 270 }
     }
   ]

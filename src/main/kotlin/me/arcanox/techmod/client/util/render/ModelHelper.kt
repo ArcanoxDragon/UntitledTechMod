@@ -37,7 +37,7 @@ object ModelHelper : IFutureReloadListener {
 	 */
 	fun getModel(resourceLocation: ResourceLocation): LazyCache<IBakedModel> = lazyCache { Minecraft.getInstance().modelManager.getModel(resourceLocation) }
 	
-	@ExperimentalStdlibApi
+	@Suppress("UNUSED_PARAMETER")
 	@SubscribeEvent
 	fun registerModels(event: ModelRegistryEvent) {
 		Logger.info("Beginning model loading...");

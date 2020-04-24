@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod
 object ItemsAPI : IItemAPI {
 	val items = mutableMapOf<String, Item>()
 	
+	@Suppress("UNUSED_PARAMETER")
 	@SubscribeEvent
 	fun registerItems(event: RegistryEvent.Register<Item>): Unit {
 		// TODO: Discover and register all Items

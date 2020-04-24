@@ -1,0 +1,26 @@
+modLoader="kotlinforforge"
+loaderVersion="[1,)"
+[[mods]]
+modId="techmod"
+version="${version}"
+displayName="Tech Mod"
+# updateJSONURL="http://myurl.me/"
+# displayURL="http://example.com/"
+logoFile="icon.png"
+# credits=""
+authors="Arcanox"
+description='''
+TODO: This is a placeholder description for this mod!
+'''
+[[dependencies.techmod]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.techmod]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2,)"
+    ordering="NONE"
+    side="BOTH"

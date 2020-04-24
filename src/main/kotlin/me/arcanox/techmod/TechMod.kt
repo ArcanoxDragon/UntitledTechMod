@@ -1,53 +1,52 @@
 package me.arcanox.techmod
 
-import me.arcanox.techmod.common.proxy.CommonProxy
+import me.arcanox.techmod.client.IClientInitHandler
+import me.arcanox.techmod.common.IInitHandler
 import me.arcanox.techmod.util.Logger
+import me.arcanox.techmod.util.reflect.ClientInitHandler
+import me.arcanox.techmod.util.reflect.InitHandler
+import me.arcanox.techmod.util.reflect.ReflectionHelper
 import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.common.Mod.EventHandler
-import net.minecraftforge.fml.common.SidedProxy
-import net.minecraftforge.fml.common.event.FMLInitializationEvent
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
+import thedarkcolour.kotlinforforge.forge.MOD_CONTEXT
 
-@Mod(name = TechMod.Name, modid = TechMod.ModID, version = TechMod.Version, dependencies = TechMod.Dependencies, modLanguageAdapter = TechMod.Adapter)
+@Mod(TechMod.ModID)
 object TechMod {
 	const val Name = "Tech Mod" // TODO: change these to actual name
 	const val ModID = "techmod" // TODO: change these to actual name
-	const val Version = "@VERSION@"
-	const val Dependencies = "required-after:forgelin;required-after:forge@[14.23.5.2768,)"
-	const val Adapter = "net.shadowfacts.forgelin.KotlinAdapter"
 	
-	@SidedProxy(
-		clientSide = "me.arcanox.$ModID.client.proxy.ClientProxy",
-		serverSide = "me.arcanox.$ModID.server.proxy.ClientProxy"
-	)
-	lateinit var proxy: CommonProxy;
+	private val commonInitHandlers = emptyList<IInitHandler>().toMutableList();
+	private val clientInitHandlers = emptyList<IClientInitHandler>().toMutableList();
 	
-	@EventHandler
-	fun preInit(event: FMLPreInitializationEvent) {
-		// Mod logger isn't initialized here so we can't use its .info shortcut
-		event.modLog.info(Logger.format("Beginning pre-initialization phase..."));
-		
-		this.proxy.onPreInit(event);
-		
-		Logger.info("Pre-initialization phase complete.");
+	init {
+		MOD_CONTEXT.getEventBus().addListener(this::onCommonInit);
+		MOD_CONTEXT.getEventBus().addListener(this::onClientInit);
 	}
 	
-	@EventHandler
-	fun init(event: FMLInitializationEvent) {
-		Logger.info("Beginning initialization phase...");
+	private fun onCommonInit(event: FMLCommonSetupEvent) {
+		Logger.info("Beginning common initialization phase...");
 		
-		this.proxy.onInit(event);
+		// Find all IInitHandler classes and allow them to initialize
+		this.commonInitHandlers += ReflectionHelper
+			.getInstancesWithAnnotation(InitHandler::class, IInitHandler::class)
+			.sortedBy { it.second.priority }
+			.map { it.first };
+		this.commonInitHandlers.forEach { it.onInit(event) };
 		
-		Logger.info("Initialization phase complete.");
+		Logger.info("Common initialization phase complete.");
 	}
 	
-	@EventHandler
-	fun postInit(event: FMLPostInitializationEvent) {
-		Logger.info("Beginning post-initialization phase...");
+	private fun onClientInit(event: FMLClientSetupEvent) {
+		Logger.info("Beginning client initialization phase...");
 		
-		this.proxy.onPostInit(event);
+		// Find all IClientInitHandler classes and allow them to initialize
+		this.clientInitHandlers += ReflectionHelper
+			.getInstancesWithAnnotation(ClientInitHandler::class, IClientInitHandler::class)
+			.sortedBy { it.second.priority }
+			.map { it.first };
+		this.clientInitHandlers.forEach { it.onClientInit(event) };
 		
-		Logger.info("Post-initialization phase complete.");
+		Logger.info("Client initialization phase complete.");
 	}
 }

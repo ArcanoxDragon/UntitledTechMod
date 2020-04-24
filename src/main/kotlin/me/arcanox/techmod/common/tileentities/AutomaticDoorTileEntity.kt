@@ -16,6 +16,7 @@ import net.minecraft.tileentity.ITickableTileEntity
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
+import net.minecraftforge.fml.DistExecutor
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -24,17 +25,21 @@ import kotlin.math.min
 @HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
 class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
 	companion object {
+		const val OpenKey = "open";
+		
 		const val TicksToOpen = 15;
 		const val Range = 4; // blocks // TODO: make this configurable later
 	}
 	
+	private var firstTick = true;
 	private var animTicks = 0;
-	private var readingNbt = false;
+	private var internalOpen = false;
 	private val checkAABB = Range.toDouble().let { AxisAlignedBB(-it, -it, -it, it, it, it) };
 	
-	var open: Boolean = false
+	var open: Boolean
+		get() = this.internalOpen
 		set(value) {
-			if (this.readingNbt || this.animTicks == 0 || this.animTicks == TicksToOpen) field = value;
+			if (this.animTicks == 0 || this.animTicks == TicksToOpen) this.internalOpen = value;
 		}
 	
 	fun getRotation(partialTicks: Float = 0.0f): Float {
@@ -53,6 +58,13 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 	override fun hasFastRenderer(): Boolean = false
 	
 	override fun tick() {
+		if (firstTick) {
+			// Door shouldn't animate open on the client if it's been loaded as open from the server right after joining the world
+			
+			this.animTicks = if (this.open) TicksToOpen else 0;
+			this.firstTick = false;
+		}
+		
 		if (this.open && this.animTicks < TicksToOpen) this.animTicks++;
 		if (!this.open && this.animTicks > 0) this.animTicks--;
 		
@@ -91,15 +103,23 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 		}
 	}
 	
+	override fun write(compound: CompoundNBT): CompoundNBT = super.write(compound).also {
+		it.putBoolean(OpenKey, this.open);
+	}
+	
+	override fun read(compound: CompoundNBT) {
+		super.read(compound)
+		
+		this.internalOpen = compound.getBoolean(OpenKey);
+	}
+	
 	override fun getUpdateTag(): CompoundNBT = super.getUpdateTag().also {
-		it.putBoolean("open", this.open)
+		it.putBoolean(OpenKey, this.open);
 	}
 	
 	override fun handleUpdateTag(tag: CompoundNBT) {
 		super.handleUpdateTag(tag);
 		
-		this.readingNbt = true;
-		this.open = tag.getBoolean("open");
-		this.readingNbt = false;
+		this.internalOpen = tag.getBoolean(OpenKey);
 	}
 }

@@ -6,7 +6,6 @@ import me.arcanox.techmod.util.reflect.ReflectionHelper
 import me.arcanox.techmod.util.lazyCache
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.model.IBakedModel
-import net.minecraft.client.resources.ReloadListener
 import net.minecraft.profiler.IProfiler
 import net.minecraft.resources.IFutureReloadListener
 import net.minecraft.resources.IReloadableResourceManager
@@ -23,8 +22,8 @@ import kotlin.reflect.full.companionObjectInstance
 @Target(AnnotationTarget.CLASS)
 annotation class ConsumesModels;
 
-public interface IModelConsumer {
-	fun reloadModels(): Unit;
+interface IModelConsumer {
+	fun reloadModels();
 	fun getModelLocations(): Sequence<ResourceLocation>;
 }
 

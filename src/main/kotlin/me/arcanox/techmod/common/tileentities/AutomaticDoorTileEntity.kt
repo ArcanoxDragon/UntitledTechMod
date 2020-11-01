@@ -8,15 +8,13 @@ import me.arcanox.techmod.util.extensions.horizontalNeighbors
 import me.arcanox.techmod.util.reflect.HasTileEntityRenderer
 import me.arcanox.techmod.util.reflect.ModTileEntity
 import me.arcanox.techmod.util.toVec3d
+import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.state.properties.BlockStateProperties
 import net.minecraft.state.properties.DoorHingeSide
 import net.minecraft.tileentity.ITickableTileEntity
 import net.minecraft.util.math.AxisAlignedBB
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.fml.DistExecutor
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -53,9 +51,6 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 	}
 	
 	override fun getRenderBoundingBox(): AxisAlignedBB = super.getRenderBoundingBox().expand(0.0, 1.0, 0.0)
-	
-	@OnlyIn(Dist.CLIENT)
-	override fun hasFastRenderer(): Boolean = false
 	
 	override fun tick() {
 		if (firstTick) {
@@ -107,8 +102,8 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 		it.putBoolean(OpenKey, this.open);
 	}
 	
-	override fun read(compound: CompoundNBT) {
-		super.read(compound)
+	override fun read(blockState: BlockState, compound: CompoundNBT) {
+		super.read(blockState, compound)
 		
 		this.internalOpen = compound.getBoolean(OpenKey);
 	}
@@ -117,8 +112,8 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntities.getTileEntityType<Au
 		it.putBoolean(OpenKey, this.open);
 	}
 	
-	override fun handleUpdateTag(tag: CompoundNBT) {
-		super.handleUpdateTag(tag);
+	override fun handleUpdateTag(blockState: BlockState, tag: CompoundNBT) {
+		super.handleUpdateTag(blockState, tag);
 		
 		this.internalOpen = tag.getBoolean(OpenKey);
 	}

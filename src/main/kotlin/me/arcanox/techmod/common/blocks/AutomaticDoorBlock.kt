@@ -120,30 +120,8 @@ object AutomaticDoorBlock : BlockBase(
 	// region Interaction
 	
 	override fun onBlockActivated(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, handIn: Hand, rayTraceResult: BlockRayTraceResult): ActionResultType {
-//		if (world.isRemote) return true;
-//
-//		val half = state.getValue(DOUBLE_BLOCK_HALF);
-//
-//		return when (half) {
-//			BlockDoor.EnumDoorHalf.UPPER -> {
-//				val below = pos.down();
-//				val belowState = world.getBlockState(below);
-//
-//				if (belowState.block !== this) false;
-//				else belowState.block.onBlockActivated(world, below, belowState, player, hand, facing, hitX, hitY, hitZ);
-//			}
-//			else                         -> {
-//				val te = this.getTileEntitySafe(world, pos, state) as TileEntityAutomaticDoor;
-//
-//				te.open = !te.open;
-//				world.setBlockState(pos, state.withProperty(BlockDoor.OPEN, te.open), 3);
-//
-//				true;
-//			}
-//		}
-		
 		// TODO: Open some sort of GUI later
-		return super.onBlockActivated(state, world, pos, player, handIn, rayTraceResult);
+		return ActionResultType.PASS;
 	}
 	
 	// endregion
@@ -305,10 +283,10 @@ object AutomaticDoorBlock : BlockBase(
 		val doorToRight = stateRight.block == this && stateRight.get(DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
 		
 		// Bias towards the side with the most adjacent solid faces
-		val adjacentBlockBias = (if (stateLeft.isCollisionShapeOpaque(world, posLeft)) -1 else 0) +
-		                        (if (stateUpLeft.isCollisionShapeOpaque(world, posUpLeft)) -1 else 0) +
-		                        (if (stateRight.isCollisionShapeOpaque(world, posRight)) 1 else 0) +
-		                        (if (stateUpRight.isCollisionShapeOpaque(world, posUpRight)) 1 else 0);
+		val adjacentBlockBias = (if (stateLeft.isOpaqueCube(world, posLeft)) -1 else 0) +
+		                        (if (stateUpLeft.isOpaqueCube(world, posUpLeft)) -1 else 0) +
+		                        (if (stateRight.isOpaqueCube(world, posRight)) 1 else 0) +
+		                        (if (stateUpRight.isOpaqueCube(world, posUpRight)) 1 else 0);
 		
 		return if ((!doorToLeft || doorToRight) && adjacentBlockBias <= 0) {
 			if ((!doorToRight || doorToLeft) && adjacentBlockBias >= 0) {
@@ -356,7 +334,7 @@ object AutomaticDoorBlock : BlockBase(
 			world.setBlockState(otherHalfPos, Blocks.AIR.defaultState, BlockFlags.DEFAULT or BlockFlags.NO_NEIGHBOR_DROPS);
 			world.playEvent(player, WorldEvents.BREAK_BLOCK_EFFECTS, otherHalfPos, getStateId(otherHalfState));
 			
-			if (!world.isRemote && !player.isCreative && player.canHarvestBlock(otherHalfState)) {
+			if (!world.isRemote && !player.isCreative && player.func_234569_d_(otherHalfState)) {
 				val handStack = player.heldItemMainhand;
 				
 				spawnDrops(state, world, pos, null, player, handStack);

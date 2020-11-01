@@ -19,6 +19,7 @@ inline fun <reified T : Annotation> Any.classHasAnnotation(declaredOnly: Boolean
 object ReflectionHelper {
 	fun <C, A : Annotation> getClassesWithAnnotation(annotationClass: Class<A>, supertype: Class<C>): List<Pair<Class<out C>, A>> {
 		val annotationType = Type.getType(annotationClass);
+		
 		val allScanData = ModList.get().allScanData;
 		
 		return allScanData.flatMap { scanData ->
@@ -54,7 +55,7 @@ object ReflectionHelper {
 	
 	fun <C, A : Annotation> getInstancesWithAnnotation(annotationClass: Class<A>,
 	                                                   supertype: Class<C>,
-	                                                   new: (Class<out C>) -> C = { it.newInstance() }): List<Pair<C, A>> =
+	                                                   new: (Class<out C>) -> C = { it.getDeclaredConstructor().newInstance() }): List<Pair<C, A>> =
 		getClassesWithAnnotation(annotationClass, supertype).map { (it, annotation) ->
 			try {
 				val instance = new(it);

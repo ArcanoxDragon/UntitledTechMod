@@ -13,7 +13,7 @@ object ItemsAPI : IItemAPI {
 	
 	@Suppress("UNUSED_PARAMETER")
 	@SubscribeEvent
-	fun registerItems(event: RegistryEvent.Register<Item>): Unit {
+	fun registerItems(event: RegistryEvent.Register<Item>) {
 		// TODO: Discover and register all Items
 		
 		Logger.info("Registering ${this.items.size} items...");

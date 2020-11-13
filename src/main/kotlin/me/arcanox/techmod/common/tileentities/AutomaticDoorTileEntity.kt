@@ -79,11 +79,11 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntitiesInit.getTileEntityTyp
 			// Find the center point of the check area. This will be the middle of the door on a single door,
 			// or the exact center between two doors for a double door. TODO: Allow one-way doors?
 			val checkPoint = if (hasDoorNeighbor) {
-				val facing = state.get(BlockStateProperties.FACING);
+				val facing = state.get(BlockStateProperties.HORIZONTAL_FACING);
 				val hinge = state.get(BlockStateProperties.DOOR_HINGE);
 				val offsetDir = when (hinge) {
-					DoorHingeSide.LEFT -> facing.rotateYCCW()
-					DoorHingeSide.RIGHT -> facing.rotateY()
+					DoorHingeSide.LEFT -> facing.rotateY()
+					DoorHingeSide.RIGHT -> facing.rotateYCCW()
 					else                -> facing
 				};
 				

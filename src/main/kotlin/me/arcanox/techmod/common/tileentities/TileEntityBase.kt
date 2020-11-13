@@ -7,12 +7,10 @@ import net.minecraft.tileentity.TileEntityType
 
 abstract class TileEntityBase(type: TileEntityType<out TileEntity>) : TileEntity(type) {
 	override fun getUpdatePacket(): SUpdateTileEntityPacket? {
-		val root = this.updateTag;
-		return SUpdateTileEntityPacket(this.pos, 1, root);
+		return SUpdateTileEntityPacket(this.pos, 1, this.updateTag);
 	}
 	
 	override fun onDataPacket(net: NetworkManager, pkt: SUpdateTileEntityPacket) {
-		val root = pkt.nbtCompound;
-		this.handleUpdateTag(root);
+		this.handleUpdateTag(this.blockState, pkt.nbtCompound);
 	}
 }

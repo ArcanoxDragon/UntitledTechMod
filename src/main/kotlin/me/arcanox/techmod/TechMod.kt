@@ -20,8 +20,8 @@ object TechMod {
 	private val clientInitHandlers = emptyList<IClientInitHandler>().toMutableList();
 	
 	init {
-		MOD_CONTEXT.getEventBus().addListener(this::onCommonInit);
-		MOD_CONTEXT.getEventBus().addListener(this::onClientInit);
+		MOD_CONTEXT.getKEventBus().addListener(this::onCommonInit);
+		MOD_CONTEXT.getKEventBus().addListener(this::onClientInit);
 	}
 	
 	private fun onCommonInit(event: FMLCommonSetupEvent) {

@@ -159,6 +159,20 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
+task apiJar(type: Jar) {
+    archiveClassifier.set("api")
+
+    from(sourceSets.main.output) {
+        include "me/arcanox/techmod/api/**"
+        exclude "me/arcanox/techmod/api/impl/**"
+        exclude "me/arcanox/techmod/api/ApiInit.class"
+    }
+}
+
+artifacts {
+    archives apiJar
+}
+
 shadowJar {
     classifier ""
 
@@ -175,6 +189,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
+            artifact apiJar
         }
     }
     repositories {

@@ -12,12 +12,12 @@ import net.minecraft.resources.IReloadableResourceManager
 import net.minecraft.resources.IResourceManager
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.event.ModelRegistryEvent
-import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import kotlin.reflect.full.companionObjectInstance
+import net.minecraftforge.client.model.ModelLoader as ForgeModelLoader
 
 @Target(AnnotationTarget.CLASS)
 annotation class ConsumesModels;
@@ -28,11 +28,11 @@ interface IModelConsumer {
 }
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-object ModelHelper : IFutureReloadListener {
+object ModelLoader : IFutureReloadListener {
 	private val modelConsumers = mutableListOf<IModelConsumer>()
 	
 	/**
-	 * It's shorter to type.
+	 * Returns a LazyCache which will initialize with an IBakedModel instance for the provided ResourceLocation
 	 */
 	fun getModel(resourceLocation: ResourceLocation): LazyCache<IBakedModel> = lazyCache { Minecraft.getInstance().modelManager.getModel(resourceLocation) }
 	
@@ -42,38 +42,31 @@ object ModelHelper : IFutureReloadListener {
 		Logger.info("Beginning model loading...");
 		
 		// Find all IModelConsumers and register their models
-		ReflectionHelper
-			.getClassesWithAnnotation(ConsumesModels::class, Any::class)
-			.forEach { (modelConsumerClass, _) ->
-				val companionInstance = modelConsumerClass.companionObjectInstance;
-				val modelConsumer = companionInstance as? IModelConsumer;
-				
-				if (modelConsumer == null) {
-					Logger.warn("Class \"${modelConsumerClass.simpleName}\" has a ConsumesModels annotation, but its companion object does not implement IModelConsumer");
-					return@forEach;
-				}
-				
-				modelConsumer.getModelLocations().forEach { ModelLoader.addSpecialModel(it) };
-				this.modelConsumers += modelConsumer;
-			};
+		ReflectionHelper.forClassesWithAnnotation(ConsumesModels::class, Any::class) { modelConsumerClass, _ ->
+			val companionInstance = modelConsumerClass.companionObjectInstance;
+			val modelConsumer = companionInstance as? IModelConsumer;
+			
+			if (modelConsumer == null) {
+				Logger.warn("Class \"${modelConsumerClass.simpleName}\" has a ConsumesModels annotation, but it does not have a companion object which implements IModelConsumer");
+				return@forClassesWithAnnotation;
+			}
+			
+			modelConsumer.getModelLocations().forEach { ForgeModelLoader.addSpecialModel(it) };
+			this.modelConsumers += modelConsumer;
+		};
 		
 		// Listen for reloads
-		val resourceManager = Minecraft.getInstance().resourceManager;
+		val reloadableResourceManager = Minecraft.getInstance().resourceManager as? IReloadableResourceManager;
 		
-		if (resourceManager is IReloadableResourceManager) {
-			resourceManager.addReloadListener(this);
-		}
+		reloadableResourceManager?.addReloadListener(this);
 		
 		Logger.info("Model loading complete.");
 	}
 	
-	@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-	override fun reload(stage: IFutureReloadListener.IStage,
-	                    resourceManager: IResourceManager,
-	                    preparationsProfiler: IProfiler,
-	                    reloadProfiler: IProfiler,
-	                    backgroundExecutor: Executor,
-	                    gameExecutor: Executor): CompletableFuture<Void> = stage.markCompleteAwaitingOthers(null).thenAcceptAsync {
+	override fun reload(stage: IFutureReloadListener.IStage, resourceManager: IResourceManager, preparationsProfiler: IProfiler,
+	                    reloadProfiler: IProfiler, backgroundExecutor: Executor, gameExecutor: Executor): CompletableFuture<Void> = CompletableFuture.runAsync {
+		Logger.debug("Beginning ModelConsumer reload...");
 		this.modelConsumers.forEach { it.reloadModels() };
-	}
+		Logger.debug("ModelConsumer reload is complete.");
+	}.thenCompose(stage::markCompleteAwaitingOthers)
 }

@@ -4,8 +4,9 @@ import com.mojang.blaze3d.matrix.MatrixStack
 import me.arcanox.techmod.TechMod
 import me.arcanox.techmod.client.util.render.ConsumesModels
 import me.arcanox.techmod.client.util.render.IModelConsumer
-import me.arcanox.techmod.client.util.render.ModelHelper
+import me.arcanox.techmod.client.util.render.ModelLoader
 import me.arcanox.techmod.common.tileentities.AutomaticDoorTileEntity
+import me.arcanox.techmod.util.extensions.pushAnd
 import me.arcanox.techmod.util.extensions.translateVoxels
 import net.minecraft.client.renderer.IRenderTypeBuffer
 import net.minecraft.client.renderer.RenderType
@@ -24,10 +25,11 @@ class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher
 	companion object : IModelConsumer {
 		private val DoorModelLocation = ResourceLocation(TechMod.ModID, "block/automatic_door/door");
 		
-		val DoorModel = ModelHelper.getModel(DoorModelLocation)
+		val DoorModel = ModelLoader.getModel(DoorModelLocation)
 		
 		override fun reloadModels() {
 			DoorModel.invalidate();
+			DoorModel.poke(); // Load it now
 		}
 		
 		override fun getModelLocations() = sequence {
@@ -42,32 +44,30 @@ class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher
 		val facing = state.get(BlockStateProperties.HORIZONTAL_FACING);
 		val builder = buffer.getBuffer(RenderType.getCutout());
 		
-		// Transform based on door facing/animation
-		matrixStack.push();
-		
-		matrixStack.translateVoxels(8, 0, 8); // Center of block
-		matrixStack.rotate(Quaternion(Vector3f.YN, facing.horizontalAngle, true));
-		matrixStack.translateVoxels(-8, 0, -8); // Back to origin
-		
-		when (hinge) {
-			DoorHingeSide.LEFT -> {
-				// Hinge is at 1,0,1, rotate counter-clockwise
-				matrixStack.translateVoxels(15, 0, 1);
-				matrixStack.rotate(Quaternion(Vector3f.YP, tileEntity.getRotation(partialTicks), true));
-				matrixStack.translateVoxels(-15, 0, -1);
+		matrixStack.pushAnd {
+			// Transform based on door facing/animation
+			translateVoxels(8, 0, 8); // Center of block
+			rotate(Quaternion(Vector3f.YN, facing.horizontalAngle, true));
+			translateVoxels(-8, 0, -8); // Back to origin
+			
+			when (hinge) {
+				DoorHingeSide.LEFT -> {
+					// Hinge is at voxel 15,0,1, rotate counter-clockwise
+					translateVoxels(15, 0, 1);
+					rotate(Quaternion(Vector3f.YP, tileEntity.getRotation(partialTicks), true));
+					translateVoxels(-15, 0, -1);
+				}
+				else               -> {
+					// Hinge is at voxel 1,0,1, rotate clockwise
+					translateVoxels(1, 0, 1);
+					rotate(Quaternion(Vector3f.YP, -tileEntity.getRotation(partialTicks), true));
+					translateVoxels(-1, 0, -1);
+				}
 			}
-			else               -> {
-				// Hinge is at 1,0,1, rotate clockwise
-				matrixStack.translateVoxels(1, 0, 1);
-				matrixStack.rotate(Quaternion(Vector3f.YP, -tileEntity.getRotation(partialTicks), true));
-				matrixStack.translateVoxels(-1, 0, -1);
-			}
+			
+			// Render the door
+			this@AutomaticDoorTileRenderer.renderModel(DoorModel, builder, matrixStack, state, world.random, combinedLight, combinedOverlay);
 		}
-		
-		// Render the door
-		this.renderModel(DoorModel, builder, matrixStack, state, world.random, combinedLight, combinedOverlay);
-		
-		matrixStack.pop();
 	}
 	
 }

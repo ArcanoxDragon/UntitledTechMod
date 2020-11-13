@@ -1,7 +1,7 @@
 package me.arcanox.techmod.common.tileentities
 
 import me.arcanox.techmod.TechMod
-import me.arcanox.techmod.api.blocks.BlocksAPI
+import me.arcanox.techmod.api.impl.blocks.BlocksApiImpl
 import me.arcanox.techmod.client.IClientInitHandler
 import me.arcanox.techmod.util.Logger
 import me.arcanox.techmod.util.reflect.*
@@ -23,7 +23,8 @@ import kotlin.reflect.full.starProjectedType
 
 @ClientInitHandler
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-object TileEntities : IClientInitHandler {
+object TileEntitiesInit : IClientInitHandler {
+	// TODO: Adjust prefix when mod ID is changed
 	private const val TesrPackagePrefix = "me.arcanox.techmod.client.tileentities.renderers";
 	
 	private val tileEntities = mutableMapOf<KClass<out TileEntity>, TileEntityType<out TileEntity>>();
@@ -33,19 +34,17 @@ object TileEntities : IClientInitHandler {
 	
 	@SubscribeEvent
 	fun registerTileEntities(event: RegistryEvent.Register<TileEntityType<out TileEntity>>) {
-		this.tileEntities += ReflectionHelper
-			.getClassesWithAnnotation(ModTileEntity::class, TileEntity::class)
-			.associate { (tileEntityClass, tileEntityAnnotation) ->
-				val validBlocks = tileEntityAnnotation.blocks.map { BlocksAPI.getBlock(it) }.toTypedArray()
-				
-				@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-				val tileEntityType = TileEntityType.Builder.create({ tileEntityClass.createInstance() }, *validBlocks).build(null);
-				
-				tileEntityType.setRegistryName(TechMod.ModID, tileEntityAnnotation.id);
-				event.registry.register(tileEntityType);
-				
-				Pair(tileEntityClass, tileEntityType);
-			};
+		ReflectionHelper.forClassesWithAnnotation(ModTileEntity::class, TileEntity::class) { tileEntityClass, tileEntityAnnotation ->
+			val validBlocks = tileEntityAnnotation.blocks.map { BlocksApiImpl.getBlock(it) }.toTypedArray()
+			
+			@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+			val tileEntityType = TileEntityType.Builder.create({ tileEntityClass.createInstance() }, *validBlocks).build(null);
+			
+			tileEntityType.setRegistryName(TechMod.ModID, tileEntityAnnotation.id);
+			event.registry.register(tileEntityType);
+			
+			this.tileEntities += Pair(tileEntityClass, tileEntityType);
+		};
 	}
 	
 	override fun onClientInit(e: FMLClientSetupEvent) {

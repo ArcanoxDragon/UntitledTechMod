@@ -114,7 +114,6 @@ object AutomaticDoorBlock : BlockBase(
 	
 	override fun isSideInvisible(state: BlockState, adjacentBlockState: BlockState, side: Direction): Boolean = false
 	
-	
 	// endregion
 	
 	// region Interaction
@@ -127,88 +126,6 @@ object AutomaticDoorBlock : BlockBase(
 	// endregion
 	
 	// region AABB
-	
-	/*
-//	override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos): AxisAlignedBB {
-//		if (!world.isRemote) return super.getSelectedBoundingBox(state, world, pos);
-//
-//		val box = this.getBoundingBox(state, world, pos).offset(pos);
-//		return box;
-//		val half = state.getValue(DOUBLE_BLOCK_HALF);
-//		var partHit = SelectedAABB.Frame;
-//
-//		val result = when (half) {
-//			BlockDoor.EnumDoorHalf.LOWER -> box
-//			else                         -> {
-//				val mc = Minecraft.getMinecraft();
-//				val player = mc.player;
-//				val reach = mc.playerController.blockReachDistance;
-//				val adjDir = state.getValue(BlockHorizontal.FACING).opposite;
-//				val fVec = adjDir.directionVec;
-//				val adjV = 1.0 - MountHeight;
-//				val adjH = MountWidth - FrameThickness;
-//				val boxWhenClosed = this.getBoundingBox(state.withProperty(BlockDoor.OPEN, false), world, pos)
-//					.offset(pos)
-//					.contract(0.0, -adjV, 0.0)
-//					.addCoord(adjH * fVec.x, 0.0, adjH * fVec.z);
-//
-//				this.setAABBForSelection(Block.FULL_BLOCK_AABB);
-//				val trace = player.rayTrace(reach.toDouble(), 1.0f);
-//				this.setAABBForSelection(null);
-//
-//				when (trace) {
-//					null -> this.selectedBB.first
-//					else -> {
-//						if (trace.typeOfHit === RayTraceResult.Type.MISS)
-//							this.selectedBB.first;
-//
-//						val bPos = Vec3d(trace.blockPos.x.toDouble(), trace.blockPos.y.toDouble(), trace.blockPos.z.toDouble());
-//						val subHit = trace.hitVec.subtract(bPos);
-//
-//						if (subHit.yCoord >= adjV || trace.sideHit == EnumFacing.DOWN) {
-//							partHit = SelectedAABB.Mount;
-//
-//							boxWhenClosed;
-//						} else {
-//							box.contract(0.0, MountHeight, 0.0);
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		this.selectedBB = Pair(result, partHit);
-//
-//		return result;
-//	}
-*/
-	
-	/*override fun getBoundingBox(stateIn: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
-		val state = stateIn.getActualState(world, pos);
-		val open = state.getValue(BlockDoor.OPEN);
-		val hinge = state.getValue(BlockDoor.HINGE);
-		val half = state.getValue(DOUBLE_BLOCK_HALF);
-		val facing = state.getValue(BlockHorizontal.FACING);
-		val hingeSide = when (hinge) {
-			BlockDoor.EnumHingePosition.LEFT -> facing.rotateY()
-			else                             -> facing.rotateYCCW()
-		};
-		val bbSide = when {
-			open -> hingeSide
-			else -> facing
-		};
-		val rotatedBox = when (bbSide) {
-			EnumFacing.NORTH -> NorthShape
-			EnumFacing.EAST  -> EastShape
-			EnumFacing.SOUTH -> SouthShape
-			else             -> WestShape
-		}
-		
-		return when (half) {
-			BlockDoor.EnumDoorHalf.LOWER -> rotatedBox.expand(0.0, 1.0 - MountHeight, 0.0)
-			else                         -> rotatedBox.expand(0.0, -1.0, 0.0).contract(0.0, MountHeight, 0.0)
-		}
-	}*/
 	
 	override fun getShape(state: BlockState, worldIn: IBlockReader, pos: BlockPos, context: ISelectionContext): VoxelShape {
 		val shapeFacing = state.get(HORIZONTAL_FACING).opposite; // Minecraft doors "face" the opposite side from the one that they're flush with
@@ -316,7 +233,7 @@ object AutomaticDoorBlock : BlockBase(
 	
 	// region Removing
 	
-	override fun getPushReaction(state: BlockState?) = PushReaction.DESTROY
+	override fun getPushReaction(state: BlockState?) = PushReaction.BLOCK
 	
 	override fun harvestBlock(worldIn: World, player: PlayerEntity, pos: BlockPos, state: BlockState, te: TileEntity?, stack: ItemStack) {
 		super.harvestBlock(worldIn, player, pos, Blocks.AIR.defaultState, te, stack)

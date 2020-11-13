@@ -74,24 +74,21 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntitiesInit.getTileEntityTyp
 		if (canChangeState) {
 			val state = world.getBlockState(pos);
 			val middleDoor = this.pos.toVector3d().add(0.5, 0.0, 0.5);
-			val hasDoorNeighbor = this.pos.horizontalNeighbors().any { world.getBlockState(it).block === this.blockState };
+			val hasDoorNeighbor = this.pos.horizontalNeighbors().any { world.getBlockState(it).block === this.blockState.block };
 			
 			// Find the center point of the check area. This will be the middle of the door on a single door,
 			// or the exact center between two doors for a double door. TODO: Allow one-way doors?
-			val checkPoint = when {
-				hasDoorNeighbor -> {
-					val facing = state.get(BlockStateProperties.FACING);
-					val hinge = state.get(BlockStateProperties.DOOR_HINGE);
-					val offsetDir = when (hinge) {
-						DoorHingeSide.LEFT -> facing.rotateYCCW()
-						DoorHingeSide.RIGHT -> facing.rotateY()
-						else                -> facing
-					}
-					
-					middleDoor.add(offsetDir.xOffset * 0.5, 0.0, offsetDir.zOffset * 0.5);
-				}
-				else            -> middleDoor
-			}
+			val checkPoint = if (hasDoorNeighbor) {
+				val facing = state.get(BlockStateProperties.FACING);
+				val hinge = state.get(BlockStateProperties.DOOR_HINGE);
+				val offsetDir = when (hinge) {
+					DoorHingeSide.LEFT -> facing.rotateYCCW()
+					DoorHingeSide.RIGHT -> facing.rotateY()
+					else                -> facing
+				};
+				
+				middleDoor.add(offsetDir.xOffset * 0.5, 0.0, offsetDir.zOffset * 0.5)
+			} else middleDoor;
 			
 			// See if there are any entities within the check area. TODO: Allow filtering later on?
 			val entities = world.getEntitiesWithinAABB(EntityType.PLAYER, this.checkAABB.offset(checkPoint), Predicates.alwaysTrue());
@@ -111,9 +108,7 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntitiesInit.getTileEntityTyp
 		it.putBoolean(OpenKey, this.open);
 	}
 	
-	override fun read(blockState: BlockState, compound: CompoundNBT) {
-		super.read(blockState, compound)
-		
+	override fun read(blockState: BlockState, compound: CompoundNBT) = super.read(blockState, compound).also {
 		this.internalOpen = compound.getBoolean(OpenKey);
 	}
 	
@@ -121,9 +116,7 @@ class AutomaticDoorTileEntity : TileEntityBase(TileEntitiesInit.getTileEntityTyp
 		it.putBoolean(OpenKey, this.open);
 	}
 	
-	override fun handleUpdateTag(blockState: BlockState, tag: CompoundNBT) {
-		super.handleUpdateTag(blockState, tag);
-		
+	override fun handleUpdateTag(blockState: BlockState, tag: CompoundNBT) = super.handleUpdateTag(blockState, tag).also {
 		this.internalOpen = tag.getBoolean(OpenKey);
 	}
 }

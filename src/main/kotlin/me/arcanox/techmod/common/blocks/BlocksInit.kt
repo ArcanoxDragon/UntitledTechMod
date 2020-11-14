@@ -1,11 +1,13 @@
 package me.arcanox.techmod.common.blocks
 
+import me.arcanox.lib.common.blocks.BlockBase
 import me.arcanox.techmod.TechModItemGroup
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.reflect.HasBlockItem
-import me.arcanox.techmod.util.reflect.ModBlock
-import me.arcanox.techmod.util.reflect.ReflectionHelper
-import me.arcanox.techmod.util.reflect.classHasAnnotation
+import me.arcanox.lib.util.reflect.HasBlockItem
+import me.arcanox.lib.util.reflect.ModBlock
+import me.arcanox.lib.util.reflect.ReflectionHelper
+import me.arcanox.lib.util.reflect.classHasAnnotation
+import me.arcanox.techmod.TechMod
 import net.minecraft.block.Block
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
@@ -25,7 +27,7 @@ object BlocksInit {
 	
 	@SubscribeEvent
 	fun registerBlocks(event: RegistryEvent.Register<Block>) {
-		ReflectionHelper.forInstancesWithAnnotation(ModBlock::class, BlockBase::class) { block, _ ->
+		ReflectionHelper.forInstancesWithAnnotation(ModBlock::class, BlockBase::class, TechMod.PackagePrefix) { block, _ ->
 			this.blocks += Pair(block.apiName, block);
 			this.blockClasses += Pair(block.javaClass.kotlin, block);
 		};

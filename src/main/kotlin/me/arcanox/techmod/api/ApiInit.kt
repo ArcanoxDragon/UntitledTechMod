@@ -3,8 +3,8 @@ package me.arcanox.techmod.api
 import me.arcanox.techmod.api.impl.TechModApiImpl
 import me.arcanox.techmod.api.impl.blocks.BlocksApiImpl
 import me.arcanox.techmod.api.impl.items.ItemsApiImpl
-import me.arcanox.techmod.common.IInitHandler
-import me.arcanox.techmod.util.reflect.InitHandler
+import me.arcanox.lib.common.IInitHandler
+import me.arcanox.lib.util.reflect.InitHandler
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
 
 @InitHandler(priority = 999 /* after everything (theoretically) */)

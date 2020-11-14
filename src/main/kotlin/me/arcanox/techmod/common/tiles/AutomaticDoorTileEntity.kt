@@ -1,13 +1,14 @@
-package me.arcanox.techmod.common.tileentities
+package me.arcanox.techmod.common.tiles
 
 import com.google.common.base.Predicates
+import me.arcanox.lib.common.tiles.NetworkedTileEntityBase
 import me.arcanox.techmod.api.Constants
-import me.arcanox.techmod.client.tileentities.renderers.AutomaticDoorTileRenderer
+import me.arcanox.techmod.client.tiles.renderers.AutomaticDoorTileRenderer
 import me.arcanox.techmod.common.blocks.AutomaticDoorBlock
-import me.arcanox.techmod.util.extensions.horizontalNeighbors
-import me.arcanox.techmod.util.reflect.HasTileEntityRenderer
-import me.arcanox.techmod.util.reflect.ModTileEntity
-import me.arcanox.techmod.util.toVector3d
+import me.arcanox.lib.util.extensions.horizontalNeighbors
+import me.arcanox.lib.util.reflect.HasTileEntityRenderer
+import me.arcanox.lib.util.reflect.ModTileEntity
+import me.arcanox.lib.util.toVector3d
 import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.nbt.CompoundNBT
@@ -21,7 +22,7 @@ import kotlin.math.min
 
 @ModTileEntity(Constants.Blocks.AutomaticDoor, AutomaticDoorBlock::class)
 @HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
-class AutomaticDoorTileEntity : TileEntityBase(TileEntitiesInit.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
+class AutomaticDoorTileEntity : NetworkedTileEntityBase(TileEntitiesInit.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
 	companion object {
 		const val OpenKey = "open";
 		

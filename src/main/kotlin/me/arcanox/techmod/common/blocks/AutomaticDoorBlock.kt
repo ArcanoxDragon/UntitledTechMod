@@ -1,10 +1,11 @@
 package me.arcanox.techmod.common.blocks
 
+import me.arcanox.lib.common.blocks.BlockBase
 import me.arcanox.techmod.api.Constants
-import me.arcanox.techmod.common.tileentities.AutomaticDoorTileEntity
-import me.arcanox.techmod.util.reflect.HasBlockItem
-import me.arcanox.techmod.util.reflect.HasItemModel
-import me.arcanox.techmod.util.reflect.ModBlock
+import me.arcanox.techmod.common.tiles.AutomaticDoorTileEntity
+import me.arcanox.lib.util.reflect.HasBlockItem
+import me.arcanox.lib.util.reflect.HasItemModel
+import me.arcanox.lib.util.reflect.ModBlock
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks

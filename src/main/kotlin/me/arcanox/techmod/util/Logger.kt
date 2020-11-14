@@ -1,8 +1,8 @@
 package me.arcanox.techmod.util
 
 import me.arcanox.techmod.TechMod
-import me.arcanox.techmod.common.IInitHandler
-import me.arcanox.techmod.util.reflect.InitHandler
+import me.arcanox.lib.common.IInitHandler
+import me.arcanox.lib.util.reflect.InitHandler
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

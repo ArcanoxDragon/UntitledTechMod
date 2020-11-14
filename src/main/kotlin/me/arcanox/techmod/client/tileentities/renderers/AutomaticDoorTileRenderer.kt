@@ -42,7 +42,7 @@ class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher
 		val state = world.getBlockState(tileEntity.pos);
 		val hinge = state.get(BlockStateProperties.DOOR_HINGE);
 		val facing = state.get(BlockStateProperties.HORIZONTAL_FACING);
-		val builder = buffer.getBuffer(RenderType.getCutout());
+		val vertexBuilder = buffer.getBuffer(RenderType.getCutout());
 		
 		matrixStack.pushAnd {
 			// Transform based on door facing/animation
@@ -66,7 +66,7 @@ class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher
 			}
 			
 			// Render the door
-			this@AutomaticDoorTileRenderer.renderModel(DoorModel, builder, matrixStack, state, world.random, combinedLight, combinedOverlay);
+			renderModel(DoorModel, vertexBuilder, matrixStack, state, world.random, combinedLight, combinedOverlay);
 		}
 	}
 	

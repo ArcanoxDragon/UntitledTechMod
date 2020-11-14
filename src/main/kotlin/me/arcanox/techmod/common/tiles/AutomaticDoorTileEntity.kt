@@ -6,9 +6,9 @@ import me.arcanox.techmod.api.Constants
 import me.arcanox.techmod.client.tiles.renderers.AutomaticDoorTileRenderer
 import me.arcanox.techmod.common.blocks.AutomaticDoorBlock
 import me.arcanox.lib.util.extensions.horizontalNeighbors
+import me.arcanox.lib.util.extensions.toVector3d
 import me.arcanox.lib.util.reflect.HasTileEntityRenderer
 import me.arcanox.lib.util.reflect.ModTileEntity
-import me.arcanox.lib.util.toVector3d
 import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.nbt.CompoundNBT

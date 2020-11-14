@@ -22,7 +22,7 @@ import kotlin.math.min
 
 @ModTileEntity(Constants.Blocks.AutomaticDoor, AutomaticDoorBlock::class)
 @HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
-class AutomaticDoorTileEntity : NetworkedTileEntityBase(TileEntitiesInit.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
+class AutomaticDoorTileEntity : NetworkedTileEntityBase(TileEntities.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
 	companion object {
 		const val OpenKey = "open";
 		

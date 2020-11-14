@@ -21,14 +21,25 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.starProjectedType
 
+object TileEntities {
+	internal val tileEntities = mutableMapOf<KClass<out TileEntity>, TileEntityType<out TileEntity>>();
+	
+	@OnlyIn(Dist.CLIENT)
+	internal val tileEntityRenderers = mutableMapOf<KClass<out TileEntity>, TileEntityRenderer<in TileEntity>>();
+	
+	fun getTileEntityType(clazz: KClass<out TileEntity>): TileEntityType<out TileEntity> {
+		if (clazz !in TileEntities.tileEntities)
+			throw Exception("Tile entity type \"${clazz.simpleName}\" not found in registered TileEntities list. Does it have a @ModTileEntity attribute?");
+		
+		return TileEntities.tileEntities[clazz]!!;
+	}
+	
+	inline fun <reified T : TileEntity> getTileEntityType() = this.getTileEntityType(T::class)
+}
+
 @ClientInitHandler
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 object TileEntitiesInit : IClientInitHandler {
-	private val tileEntities = mutableMapOf<KClass<out TileEntity>, TileEntityType<out TileEntity>>();
-	
-	@OnlyIn(Dist.CLIENT)
-	private val tileEntityRenderers = mutableMapOf<KClass<out TileEntity>, TileEntityRenderer<in TileEntity>>();
-	
 	@SubscribeEvent
 	fun registerTileEntities(event: RegistryEvent.Register<TileEntityType<out TileEntity>>) {
 		ReflectionHelper.forClassesWithAnnotation(ModTileEntity::class, TileEntity::class, TechMod.PackagePrefix) { tileEntityClass, tileEntityAnnotation ->
@@ -39,16 +50,16 @@ object TileEntitiesInit : IClientInitHandler {
 			
 			tileEntityType.setRegistryName(TechMod.ModID, tileEntityAnnotation.id);
 			
-			this.tileEntities += Pair(tileEntityClass, tileEntityType);
+			TileEntities.tileEntities += Pair(tileEntityClass, tileEntityType);
 		};
 		
-		Logger.info("Registering ${this.tileEntities.size} tile entities...");
+		Logger.info("Registering ${TileEntities.tileEntities.size} tile entities...");
 		
-		this.tileEntities.values.forEach { event.registry.register(it) };
+		TileEntities.tileEntities.values.forEach { event.registry.register(it) };
 	}
 	
 	override fun onClientInit(e: FMLClientSetupEvent) {
-		this.tileEntities.forEach { (tileEntityClass, tileEntityType) ->
+		TileEntities.tileEntities.forEach { (tileEntityClass, tileEntityType) ->
 			try {
 				if (tileEntityClass.hasAnnotation<HasTileEntityRenderer>()) {
 					val tileEntityRendererAnnotation = tileEntityClass.java.getDeclaredAnnotation(HasTileEntityRenderer::class.java);
@@ -75,13 +86,4 @@ object TileEntitiesInit : IClientInitHandler {
 			}
 		};
 	}
-	
-	fun getTileEntityType(clazz: KClass<out TileEntity>): TileEntityType<out TileEntity> {
-		if (clazz !in this.tileEntities)
-			throw Exception("Tile entity type \"${clazz.simpleName}\" not found in registered TileEntities list. Does it have a @ModTileEntity attribute?");
-		
-		return this.tileEntities[clazz]!!;
-	}
-	
-	inline fun <reified T : TileEntity> getTileEntityType() = this.getTileEntityType(T::class)
 }

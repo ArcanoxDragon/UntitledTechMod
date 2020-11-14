@@ -16,30 +16,34 @@ import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 import kotlin.reflect.KClass
 
-
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-object BlocksInit {
+object Blocks {
 	internal val blocks = mutableMapOf<String, Block>()
 	internal val blockClasses = mutableMapOf<KClass<out Block>, Block>()
 	internal val blockItems = mutableMapOf<String, BlockItem>()
+}
+
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+object BlocksInit {
+	init {
+		// Discover block classes
+		ReflectionHelper.forInstancesWithAnnotation(ModBlock::class, BlockBase::class, TechMod.PackagePrefix) { block, _ ->
+			Blocks.blocks += Pair(block.apiName, block);
+			Blocks.blockClasses += Pair(block.javaClass.kotlin, block);
+		};
+	}
 	
 	// region Block Registration
 	
 	@SubscribeEvent
 	fun registerBlocks(event: RegistryEvent.Register<Block>) {
-		ReflectionHelper.forInstancesWithAnnotation(ModBlock::class, BlockBase::class, TechMod.PackagePrefix) { block, _ ->
-			this.blocks += Pair(block.apiName, block);
-			this.blockClasses += Pair(block.javaClass.kotlin, block);
-		};
+		Logger.info("Registering ${Blocks.blocks.size} blocks...");
 		
-		Logger.info("Registering ${this.blocks.size} blocks...");
-		
-		this.blocks.values.forEach { event.registry.register(it) };
+		Blocks.blocks.values.forEach { event.registry.register(it) };
 	}
 	
 	@SubscribeEvent
 	fun registerBlockItems(event: RegistryEvent.Register<Item>) {
-		val blocksWithItems = this.blocks.filterValues { it.classHasAnnotation<HasBlockItem>() };
+		val blocksWithItems = Blocks.blocks.filterValues { it.classHasAnnotation<HasBlockItem>() };
 		
 		Logger.info("Registering ${blocksWithItems.size} block items...");
 		
@@ -49,7 +53,7 @@ object BlocksInit {
 			val itemProperties = Item.Properties().group(TechModItemGroup).maxStackSize(annotation.maxStackSize);
 			val blockItem = BlockItem(block, itemProperties).apply { registryName = block.registryName };
 			
-			this.blockItems += Pair(name, blockItem);
+			Blocks.blockItems += Pair(name, blockItem);
 			
 			return@map blockItem;
 		};

@@ -6,11 +6,12 @@ import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 
+object Items {
+	internal val items = mutableMapOf<String, Item>()
+}
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 object ItemsInit {
-	internal val items = mutableMapOf<String, Item>()
-	
 	// region Item Registration
 	
 	@Suppress("UNUSED_PARAMETER")
@@ -18,7 +19,7 @@ object ItemsInit {
 	fun registerItems(event: RegistryEvent.Register<Item>) {
 		// TODO: Discover and register all Items
 		
-		Logger.info("Registering ${this.items.size} items...");
+		Logger.info("Registering ${Items.items.size} items...");
 	}
 	
 	// endregion Item Registration

@@ -1,7 +1,7 @@
 package me.arcanox.techmod.api.impl.blocks
 
 import me.arcanox.techmod.api.blocks.IBlocksApi
-import me.arcanox.techmod.common.blocks.BlocksInit
+import me.arcanox.techmod.common.blocks.Blocks
 import net.minecraft.block.Block
 import net.minecraft.item.BlockItem
 import net.minecraft.item.ItemStack
@@ -9,15 +9,15 @@ import kotlin.reflect.KClass
 
 object BlocksApiImpl : IBlocksApi {
 	override fun getBlock(name: String): Block? {
-		if (name !in BlocksInit.blocks) return null;
+		if (name !in Blocks.blocks) return null;
 		
-		return BlocksInit.blocks[name];
+		return Blocks.blocks[name];
 	}
 	
 	override fun getBlockItem(name: String): BlockItem? {
-		if (name !in BlocksInit.blockItems) return null;
+		if (name !in Blocks.blockItems) return null;
 		
-		return BlocksInit.blockItems[name];
+		return Blocks.blockItems[name];
 	}
 	
 	override fun getBlockItemStack(name: String, count: Int): ItemStack? {
@@ -27,8 +27,8 @@ object BlocksApiImpl : IBlocksApi {
 	}
 	
 	internal fun getBlock(clazz: KClass<out Block>): Block? {
-		if (clazz !in BlocksInit.blockClasses) return null;
+		if (clazz !in Blocks.blockClasses) return null;
 		
-		return BlocksInit.blockClasses[clazz];
+		return Blocks.blockClasses[clazz];
 	}
 }

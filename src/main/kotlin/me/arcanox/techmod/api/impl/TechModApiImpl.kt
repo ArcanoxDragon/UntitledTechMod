@@ -1,7 +1,6 @@
 package me.arcanox.techmod.api.impl
 
 import me.arcanox.techmod.api.ITechModApi
-import me.arcanox.techmod.api.TechModApi
 import me.arcanox.techmod.api.blocks.IBlocksApi
 import me.arcanox.techmod.api.items.IItemsApi
 import org.jetbrains.annotations.Contract

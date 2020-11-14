@@ -4,6 +4,7 @@ import me.arcanox.techmod.util.Logger
 import me.arcanox.lib.util.LazyCache
 import me.arcanox.lib.util.reflect.ReflectionHelper
 import me.arcanox.lib.util.lazyCache
+import me.arcanox.techmod.TechMod
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.model.IBakedModel
 import net.minecraft.profiler.IProfiler
@@ -42,7 +43,7 @@ object ModelLoader : IFutureReloadListener {
 		Logger.info("Beginning model loading...");
 		
 		// Find all IModelConsumers and register their models
-		ReflectionHelper.forClassesWithAnnotation(ConsumesModels::class, Any::class) { modelConsumerClass, _ ->
+		ReflectionHelper.forClassesWithAnnotation(ConsumesModels::class, Any::class, TechMod.PackagePrefix) { modelConsumerClass, _ ->
 			val companionInstance = modelConsumerClass.companionObjectInstance;
 			val modelConsumer = companionInstance as? IModelConsumer;
 			

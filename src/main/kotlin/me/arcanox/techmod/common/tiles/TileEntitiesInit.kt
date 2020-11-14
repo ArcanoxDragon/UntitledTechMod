@@ -31,7 +31,7 @@ object TileEntitiesInit : IClientInitHandler {
 	
 	@SubscribeEvent
 	fun registerTileEntities(event: RegistryEvent.Register<TileEntityType<out TileEntity>>) {
-		ReflectionHelper.forClassesWithAnnotation(ModTileEntity::class, TileEntity::class) { tileEntityClass, tileEntityAnnotation ->
+		ReflectionHelper.forClassesWithAnnotation(ModTileEntity::class, TileEntity::class, TechMod.PackagePrefix) { tileEntityClass, tileEntityAnnotation ->
 			val validBlocks = tileEntityAnnotation.blocks.map { BlocksApiImpl.getBlock(it) }.toTypedArray()
 			
 			@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")

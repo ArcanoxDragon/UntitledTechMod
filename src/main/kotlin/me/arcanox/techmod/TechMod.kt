@@ -15,6 +15,7 @@ import thedarkcolour.kotlinforforge.forge.MOD_CONTEXT
 object TechMod {
 	const val Name = "Tech Mod" // TODO: change these to actual name
 	const val ModID = "techmod" // TODO: change these to actual name
+	const val PackagePrefix = "me.arcanox.techmod" // TODO: change these to actual name
 	
 	private val commonInitHandlers = emptyList<IInitHandler>().toMutableList();
 	private val clientInitHandlers = emptyList<IClientInitHandler>().toMutableList();
@@ -29,7 +30,7 @@ object TechMod {
 		
 		// Find all IInitHandler classes and allow them to initialize
 		this.commonInitHandlers += ReflectionHelper
-			.getInstancesWithAnnotation(InitHandler::class, IInitHandler::class)
+			.getInstancesWithAnnotation(InitHandler::class, IInitHandler::class, TechMod.PackagePrefix)
 			.sortedBy { it.second.priority }
 			.map { it.first };
 		this.commonInitHandlers.forEach { it.onInit(event) };
@@ -42,7 +43,7 @@ object TechMod {
 		
 		// Find all IClientInitHandler classes and allow them to initialize
 		this.clientInitHandlers += ReflectionHelper
-			.getInstancesWithAnnotation(ClientInitHandler::class, IClientInitHandler::class)
+			.getInstancesWithAnnotation(ClientInitHandler::class, IClientInitHandler::class, TechMod.PackagePrefix)
 			.sortedBy { it.second.priority }
 			.map { it.first };
 		this.clientInitHandlers.forEach { it.onClientInit(event) };

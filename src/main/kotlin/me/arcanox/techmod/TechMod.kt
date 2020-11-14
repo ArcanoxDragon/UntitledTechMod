@@ -1,11 +1,11 @@
 package me.arcanox.techmod
 
-import me.arcanox.techmod.client.IClientInitHandler
-import me.arcanox.techmod.common.IInitHandler
+import me.arcanox.lib.client.IClientInitHandler
+import me.arcanox.lib.common.IInitHandler
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.reflect.ClientInitHandler
-import me.arcanox.techmod.util.reflect.InitHandler
-import me.arcanox.techmod.util.reflect.ReflectionHelper
+import me.arcanox.lib.util.reflect.ClientInitHandler
+import me.arcanox.lib.util.reflect.InitHandler
+import me.arcanox.lib.util.reflect.ReflectionHelper
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent

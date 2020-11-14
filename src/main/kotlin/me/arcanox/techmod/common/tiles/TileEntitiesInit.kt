@@ -1,10 +1,10 @@
-package me.arcanox.techmod.common.tileentities
+package me.arcanox.techmod.common.tiles
 
+import me.arcanox.lib.util.reflect.*
 import me.arcanox.techmod.TechMod
 import me.arcanox.techmod.api.impl.blocks.BlocksApiImpl
-import me.arcanox.techmod.client.IClientInitHandler
+import me.arcanox.lib.client.IClientInitHandler
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.reflect.*
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher
 import net.minecraft.tileentity.TileEntity
@@ -24,9 +24,6 @@ import kotlin.reflect.full.starProjectedType
 @ClientInitHandler
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 object TileEntitiesInit : IClientInitHandler {
-	// TODO: Adjust prefix when mod ID is changed
-	private const val TesrPackagePrefix = "me.arcanox.techmod.client.tileentities.renderers";
-	
 	private val tileEntities = mutableMapOf<KClass<out TileEntity>, TileEntityType<out TileEntity>>();
 	
 	@OnlyIn(Dist.CLIENT)
@@ -41,10 +38,13 @@ object TileEntitiesInit : IClientInitHandler {
 			val tileEntityType = TileEntityType.Builder.create({ tileEntityClass.createInstance() }, *validBlocks).build(null);
 			
 			tileEntityType.setRegistryName(TechMod.ModID, tileEntityAnnotation.id);
-			event.registry.register(tileEntityType);
 			
 			this.tileEntities += Pair(tileEntityClass, tileEntityType);
 		};
+		
+		Logger.info("Registering ${this.tileEntities.size} tile entities...");
+		
+		this.tileEntities.values.forEach { event.registry.register(it) };
 	}
 	
 	override fun onClientInit(e: FMLClientSetupEvent) {

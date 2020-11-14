@@ -1,8 +1,8 @@
-package me.arcanox.techmod.client.tileentities.renderers
+package me.arcanox.techmod.client.tiles.renderers
 
 import com.mojang.blaze3d.matrix.MatrixStack
 import com.mojang.blaze3d.vertex.IVertexBuilder
-import me.arcanox.techmod.util.LazyCache
+import me.arcanox.lib.util.LazyCache
 import net.minecraft.block.BlockState
 import net.minecraft.client.renderer.model.IBakedModel
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer

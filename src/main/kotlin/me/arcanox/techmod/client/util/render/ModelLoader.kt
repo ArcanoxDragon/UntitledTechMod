@@ -1,9 +1,9 @@
 package me.arcanox.techmod.client.util.render
 
 import me.arcanox.techmod.util.Logger
-import me.arcanox.techmod.util.LazyCache
-import me.arcanox.techmod.util.reflect.ReflectionHelper
-import me.arcanox.techmod.util.lazyCache
+import me.arcanox.lib.util.LazyCache
+import me.arcanox.lib.util.reflect.ReflectionHelper
+import me.arcanox.lib.util.lazyCache
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.model.IBakedModel
 import net.minecraft.profiler.IProfiler

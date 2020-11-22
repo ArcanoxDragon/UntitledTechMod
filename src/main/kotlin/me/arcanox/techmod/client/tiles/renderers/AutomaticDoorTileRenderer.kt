@@ -3,14 +3,12 @@ package me.arcanox.techmod.client.tiles.renderers
 import com.mojang.blaze3d.matrix.MatrixStack
 import me.arcanox.lib.client.util.extensions.renderSimple
 import me.arcanox.lib.client.util.render.ConsumesModels
-import me.arcanox.lib.client.util.render.ModelLocation
-import me.arcanox.lib.util.LazyCache
+import me.arcanox.lib.client.util.render.lazyModel
 import me.arcanox.lib.util.extensions.pushAnd
 import me.arcanox.lib.util.extensions.translateVoxels
 import me.arcanox.techmod.common.tiles.AutomaticDoorTileEntity
 import net.minecraft.client.renderer.IRenderTypeBuffer
 import net.minecraft.client.renderer.RenderType
-import net.minecraft.client.renderer.model.IBakedModel
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher
 import net.minecraft.state.properties.BlockStateProperties
@@ -24,8 +22,7 @@ import net.minecraftforge.api.distmarker.OnlyIn
 @ConsumesModels
 class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher) : TileEntityRenderer<AutomaticDoorTileEntity>(rendererDispatcher) {
 	companion object {
-		@ModelLocation("block/automatic_door/door")
-		lateinit var DoorModel: LazyCache<IBakedModel>;
+		val DoorModel = lazyModel("block/automatic_door/door")
 	}
 	
 	override fun render(tileEntity: AutomaticDoorTileEntity, partialTicks: Float, matrixStack: MatrixStack, buffer: IRenderTypeBuffer, combinedLight: Int, combinedOverlay: Int) {

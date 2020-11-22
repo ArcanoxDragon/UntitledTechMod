@@ -2,13 +2,12 @@ package me.arcanox.techmod.common.tiles
 
 import com.google.common.base.Predicates
 import me.arcanox.lib.common.tiles.NetworkedTileEntityBase
-import me.arcanox.techmod.api.Constants
-import me.arcanox.techmod.client.tiles.renderers.AutomaticDoorTileRenderer
-import me.arcanox.techmod.common.blocks.AutomaticDoorBlock
 import me.arcanox.lib.util.extensions.horizontalNeighbors
 import me.arcanox.lib.util.extensions.toVector3d
 import me.arcanox.lib.util.reflect.HasTileEntityRenderer
 import me.arcanox.lib.util.reflect.ModTileEntity
+import me.arcanox.techmod.api.Constants
+import me.arcanox.techmod.client.tiles.renderers.AutomaticDoorTileRenderer
 import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.nbt.CompoundNBT
@@ -20,7 +19,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 
-@ModTileEntity(Constants.Blocks.AutomaticDoor, AutomaticDoorBlock::class)
+@ModTileEntity(Constants.Blocks.AutomaticDoor, Constants.Blocks.AutomaticDoor)
 @HasTileEntityRenderer(AutomaticDoorTileRenderer::class)
 class AutomaticDoorTileEntity : NetworkedTileEntityBase(TileEntities.getTileEntityType<AutomaticDoorTileEntity>()), ITickableTileEntity {
 	companion object {

@@ -3,9 +3,6 @@ package me.arcanox.techmod.common.blocks
 import me.arcanox.lib.common.blocks.BlockBase
 import me.arcanox.techmod.api.Constants
 import me.arcanox.techmod.common.tiles.AutomaticDoorTileEntity
-import me.arcanox.lib.util.reflect.HasBlockItem
-import me.arcanox.lib.util.reflect.HasItemModel
-import me.arcanox.lib.util.reflect.ModBlock
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
@@ -36,11 +33,7 @@ import net.minecraftforge.common.ToolType
 import net.minecraftforge.common.util.Constants.BlockFlags
 import net.minecraftforge.common.util.Constants.WorldEvents
 
-@ModBlock
-@HasBlockItem
-@HasItemModel
 object AutomaticDoorBlock : BlockBase(
-	Constants.Blocks.AutomaticDoor,
 	Properties.create(Material.GLASS)
 		.hardnessAndResistance(4.0f)
 		.harvestTool(ToolType.PICKAXE)
@@ -99,7 +92,7 @@ object AutomaticDoorBlock : BlockBase(
 				else
 					it;
 			}
-			else -> it
+			else                  -> it
 		}
 	}
 	
@@ -109,7 +102,7 @@ object AutomaticDoorBlock : BlockBase(
 	
 	override fun allowsMovement(state: BlockState, worldIn: IBlockReader, pos: BlockPos, type: PathType): Boolean = when (type) {
 		PathType.LAND,
-		PathType.AIR   -> state.get(OPEN);
+		PathType.AIR -> state.get(OPEN);
 		PathType.WATER -> false;
 	}
 	
@@ -134,7 +127,7 @@ object AutomaticDoorBlock : BlockBase(
 		val hinge = state.get(DOOR_HINGE);
 		val openFacing = when (hinge) {
 			DoorHingeSide.LEFT -> shapeFacing.rotateY()
-			else -> shapeFacing.rotateYCCW()
+			else               -> shapeFacing.rotateYCCW()
 		};
 		val effectiveFacing = if (open) openFacing else shapeFacing;
 		
@@ -142,7 +135,7 @@ object AutomaticDoorBlock : BlockBase(
 			Direction.NORTH -> FullNorthShape;
 			Direction.SOUTH -> FullSouthShape;
 			Direction.WEST -> FullWestShape;
-			else -> FullEastShape;
+			else            -> FullEastShape;
 		};
 	}
 	
@@ -158,7 +151,7 @@ object AutomaticDoorBlock : BlockBase(
 		
 		return when (state.get(DOUBLE_BLOCK_HALF)) {
 			DoubleBlockHalf.LOWER -> stateBelow.isSolidSide(world, posBelow, Direction.UP);
-			else -> state.block == this;
+			else                  -> state.block == this;
 		}
 	}
 	
@@ -244,7 +237,7 @@ object AutomaticDoorBlock : BlockBase(
 		val half = state.get(DOUBLE_BLOCK_HALF);
 		val otherHalfPos = when (half) {
 			DoubleBlockHalf.LOWER -> pos.up();
-			else -> pos.down();
+			else                  -> pos.down();
 		};
 		val otherHalfState = world.getBlockState(otherHalfPos);
 		

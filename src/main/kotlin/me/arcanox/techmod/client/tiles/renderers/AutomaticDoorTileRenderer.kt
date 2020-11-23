@@ -6,6 +6,7 @@ import me.arcanox.lib.client.util.render.ConsumesModels
 import me.arcanox.lib.client.util.render.lazyModel
 import me.arcanox.lib.util.extensions.pushAnd
 import me.arcanox.lib.util.extensions.translateVoxels
+import me.arcanox.lib.util.reflect.TileEntityRendererFor
 import me.arcanox.techmod.common.tiles.AutomaticDoorTileEntity
 import net.minecraft.client.renderer.IRenderTypeBuffer
 import net.minecraft.client.renderer.RenderType
@@ -20,6 +21,7 @@ import net.minecraftforge.api.distmarker.OnlyIn
 
 @OnlyIn(Dist.CLIENT)
 @ConsumesModels
+@TileEntityRendererFor(AutomaticDoorTileEntity::class)
 class AutomaticDoorTileRenderer(rendererDispatcher: TileEntityRendererDispatcher) : TileEntityRenderer<AutomaticDoorTileEntity>(rendererDispatcher) {
 	companion object {
 		val DoorModel = lazyModel("block/automatic_door/door")

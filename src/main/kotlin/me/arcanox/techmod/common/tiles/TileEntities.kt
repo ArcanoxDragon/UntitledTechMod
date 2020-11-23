@@ -1,7 +1,10 @@
 package me.arcanox.techmod.common.tiles
 
 import me.arcanox.lib.client.IClientInitHandler
-import me.arcanox.lib.util.reflect.*
+import me.arcanox.lib.util.reflect.ClientInitHandler
+import me.arcanox.lib.util.reflect.ModTileEntity
+import me.arcanox.lib.util.reflect.ReflectionHelper
+import me.arcanox.lib.util.reflect.TileEntityRendererFor
 import me.arcanox.techmod.TechMod
 import me.arcanox.techmod.common.blocks.Blocks
 import me.arcanox.techmod.util.Logger
@@ -55,18 +58,18 @@ internal object TileEntities {
 		val tileEntityRenderers = mutableMapOf<KClass<out TileEntity>, TileEntityRenderer<in TileEntity>>();
 		
 		override fun onClientInit(e: FMLClientSetupEvent) {
-			tileEntities.forEach { (tileEntityClass, tileEntityType) ->
-				try {
-					if (tileEntityClass.hasAnnotation<HasTileEntityRenderer>()) {
-						val tileEntityRendererAnnotation = tileEntityClass.java.getDeclaredAnnotation(HasTileEntityRenderer::class.java);
-						val tileEntityRendererClass = tileEntityRendererAnnotation.rendererClass;
+			ReflectionHelper.forClassesWithAnnotation(TileEntityRendererFor::class, TileEntityRenderer::class, TechMod.PackagePrefix) { tileEntityRendererClass, annotation ->
+				annotation.tileEntityClasses.forEach { tileEntityClass ->
+					try {
+						val tileEntityType = tileEntities[tileEntityClass] ?: run {
+							Logger.warn("TileEntityRenderer type \"${tileEntityRendererClass.simpleName}\" specified unknown target TileEntity type \"${tileEntityClass.qualifiedName}\"");
+							return@forClassesWithAnnotation;
+						};
 						val tileEntityRendererConstructor = tileEntityRendererClass.constructors.find { c ->
 							c.parameters.size == 1 && c.parameters.first().type == TileEntityRendererDispatcher::class.starProjectedType
-						};
-						
-						if (tileEntityRendererConstructor == null) {
+						} ?: run {
 							Logger.warn("TileEntityRenderer type \"${tileEntityRendererClass.simpleName}\" is missing the required constructor accepting a TileEntityRendererDispatcher parameter")
-							return@forEach;
+							return@forClassesWithAnnotation;
 						}
 						
 						@Suppress("UNCHECKED_CAST")
@@ -75,10 +78,10 @@ internal object TileEntities {
 							
 							return@Function renderer as TileEntityRenderer<in TileEntity>;
 						});
+					} catch (ex: Exception) {
+						Logger.warn("An error occurred during the initialization of a TileEntityRenderer for TileEntity type \"${tileEntityClass.simpleName}\"");
+						ex.printStackTrace();
 					}
-				} catch (ex: Exception) {
-					Logger.warn("An error occurred during the initialization of a TileEntityRenderer for TileEntity type \"${tileEntityClass.simpleName}\"");
-					ex.printStackTrace();
 				}
 			};
 		}
